@@ -5,4 +5,4 @@ const shopCategorySchema = new mongoose.Schema({
     shops: [{ type: mongoose.Schema.Types.ObjectId, ref: "Shop" }],
 }, { timestamps: true });
 
-export const shopCategoryModel =  mongoose.model("Category", shopCategorySchema);
+export const ShopCategory =  mongoose.model("Category", shopCategorySchema);

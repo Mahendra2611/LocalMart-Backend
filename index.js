@@ -1,11 +1,34 @@
 import e from "express";
 import { configDotenv } from "dotenv";
-const app = e();
+import mongoose from "mongoose";
+
+import shopRoutes from "./routes/shop.route.js"
+import itemRoutes from "./routes/items.route.js"
+import ownerAuthRoutes from "./routes/ownerAuth.route.js"
+import rateLimit from "express-rate-limit"
+
 configDotenv();
-const PORT = process.env.PORT || 3000;
-app.get("/",(req,res)=>{
-    res.send("hellow")
+
+const limiter = rateLimit({
+    windowMs:15*60*1000,
+    limit:100,
+    message:"To many reques, Please try again later"
 })
+const app = e();
+app.use(e.json())
+app.use(limiter)
+
+app.use("/api/shops",shopRoutes);
+app.use("/api/items",itemRoutes)
+app.use("/api/ownerAuth",ownerAuthRoutes)
+
+//Database connected
+mongoose.connect(process.env.MONGODB_URL)
+.then(()=>console.log("Database connected"))
+.catch((e)=>console.log(e))
+
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT,()=>{
     console.log(`Server running on PORT ${PORT}`);
 })
