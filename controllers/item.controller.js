@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import {Item }from "../models/item.model.js";
 import { ShopDetails } from "../models/shopDetails.model.js";
 // Add an item
-export const addItem = async (req, res) => {
+export const addItem = async (req, res,next) => {
     try {
         const { name, price, quantity, category, image } = req.body;
         const { shopId } = req.params;
@@ -35,8 +35,7 @@ export const addItem = async (req, res) => {
 
         res.status(201).json({ message: "Item added successfully", item: savedNewItem, shopDetails });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+       next(error)
     }
 };
 

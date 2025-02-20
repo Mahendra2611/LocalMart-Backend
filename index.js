@@ -6,6 +6,7 @@ import shopRoutes from "./routes/shop.route.js"
 import itemRoutes from "./routes/items.route.js"
 import ownerAuthRoutes from "./routes/ownerAuth.route.js"
 import rateLimit from "express-rate-limit"
+import { errorHander } from "./middlewares/errorHandler.middleware.js";
 
 configDotenv();
 
@@ -24,6 +25,7 @@ app.use("/api/shops",shopRoutes);
 app.use("/api/items",itemRoutes)
 app.use("/api/ownerAuth",ownerAuthRoutes)
 
+app.use(errorHander)
 //Database connected
 mongoose.connect(process.env.MONGODB_URL)
 .then(()=>console.log("Database connected"))
