@@ -1,43 +1,39 @@
 import { Owner } from "../models/owner.model.js";
+import bcrypt from "bcrypt"
+import { generateToken } from "../utils/generateToken.js";
  export const signup = async (req, res) => {
     const { name, email, password } = req.body;
-
+    
     try {
-        // Check if owner already exists
+       
         const existingOwner = await Owner.findOne({ email });
         if (existingOwner) return res.status(400).json({ message: "Owner already exists" });
-
-        // Hash password
+      
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create new owner
+       
         const newOwner = new Owner({
             name,
             email,
             password: hashedPassword,
            
         });
+        
+        const savedOwner = await newOwner.save();
 
-        await newOwner.save();
-
-        // Generate tokens
-        const accessToken = generateAccessToken(newOwner);
+        const accessToken = generateToken({name:newOwner.name,email:newOwner.email});
        
+      
 
-        // Store refresh token in DB
-       
-        await newOwner.save();
-
-        // Send refresh token as HTTP-Only Cookie
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production", // Secure only in production
-            sameSite: "Strict"
+            sameSite: "Strict",
+            maxAge:7*24*60*60*1000,
         });
 
-        res.status(201).json({ message : "signup successfully" });
+        res.status(201).json({ message : "signup successfully" ,name:savedOwner.name,email:savedOwner.email});
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error : error.message , message:"server error"});
     }
 };
 
@@ -45,48 +41,40 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Check if owner exists
+       
         const owner = await Owner.findOne({ email });
         if (!owner) return res.status(404).json({ message: "Owner not found" });
 
-        // Compare password
         const validPassword = await bcrypt.compare(password, owner.password);
         if (!validPassword) return res.status(401).json({ message: "Invalid credentials" });
 
-        // Generate tokens
-        const accessToken = generateAccessToken(owner);
+        const accessToken = generateToken({name:owner.name,email:owner.email});
        
-
-        
-      
-
-        // Send refresh token as HTTP-Only Cookie
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "Strict"
+            sameSite: "Strict",
+            maxAge:7*24*60*60*1000,
         });
 
-        res.json({ message : "login successfull"});
+        res.json({ message : "login successfull" ,name:owner.name,email:owner.email});
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error : error.message,message: "Server error" });
     }
 };
 
 export const logout = async (req, res) => {
+    
     try {
-        const owner = await Owner.findOne({ refreshToken: req.cookies.refreshToken });
-        if (!owner) return res.status(403).json({ message: "Owner not logged in" });
+        const {user} = req;
+        console.log(user)
+        const owner = await Owner.findOne({email});
+        if (!owner) return res.status(403).json({ message: "Owner doesn't exist" });
 
-        // Clear refresh token from DB
-       
-       
-
-        // Clear cookie
         res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "Strict" });
 
         res.json({ message: "Logged out successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error : error.message,message: "Server error" });
     }
 };

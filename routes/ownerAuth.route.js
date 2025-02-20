@@ -5,6 +5,6 @@ import { verifyToken } from "../middlewares/auth.middleware.js";
 const router = Router();
 router.post("/login",login)
 router.get("/logout",verifyToken,logout);
-router.put("/signup",signup);
+router.post("/signup",signup);
 
 export default router;

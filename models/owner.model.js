@@ -4,7 +4,7 @@ const ownerSchema = new mongoose.Schema({
     name: {type:String,required:true},
     email: { type: String, unique: true, required: true },
     password: {type:String,required:true},
-    refreshToken: { type: String } // Store refresh token in DB
+    shopId:{type:mongoose.Schema.Types.ObjectId,ref:"Shop"},
 });
 
 export const Owner =  mongoose.model("Owner", ownerSchema);

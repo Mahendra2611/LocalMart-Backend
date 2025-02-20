@@ -1,7 +1,7 @@
 import e from "express";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
-
+import cookieParser from "cookie-parser";
 import shopRoutes from "./routes/shop.route.js"
 import itemRoutes from "./routes/items.route.js"
 import ownerAuthRoutes from "./routes/ownerAuth.route.js"
@@ -11,12 +11,14 @@ configDotenv();
 
 const limiter = rateLimit({
     windowMs:15*60*1000,
-    limit:100,
+    limit:60,
     message:"To many reques, Please try again later"
 })
 const app = e();
+
 app.use(e.json())
 app.use(limiter)
+app.use(cookieParser())
 
 app.use("/api/shops",shopRoutes);
 app.use("/api/items",itemRoutes)

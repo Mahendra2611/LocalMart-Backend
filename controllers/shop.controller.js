@@ -1,24 +1,33 @@
 import {Shop} from "../models/shop.model.js";
+import { Owner } from "../models/owner.model.js";
+import { ShopCategory } from "../models/shopCategory.model.js";
 import bcrypt from "bcrypt";
 
 // Register a new shop
 export const registerShop = async (req, res) => {
     try {
+        const {user} = req;
+
         const { ownerName,  shopCategory, shopName, address, image } = req.body;
+        
+        const existingShop = await Owner.findOne({ email:user.email });
+     
+        if (existingShop && existingShop.shopId) return res.status(400).json({ message: "Shop already registered" });
+        const shop = await ShopCategory.findOne({categoryName:shopCategory})
+        const newShop = await Shop.create({ ownerName, shopCategory, shopName, address, image });
+       
+        const savedShop = await newShop.save();
+        if(shop){
+            await ShopCategory.findByIdAndUpdate(shop._id,{$push:{shops:savedShop._id}})
+        }
+        else{
+            await ShopCategory.create({categoryName:shopCategory,$push:{shops:savedShop._id}});
+        }
+        await Owner.findByIdAndUpdate(existingShop._id,{shopId:savedShop._id});
 
-        // Check if email already exists
-        const existingShop = await Shop.findOne({ email });
-        if (existingShop) return res.status(400).json({ message: "Email already registered" });
-
-        // Hash the password before saving
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newShop = new Shop({ ownerName, email, password: hashedPassword, shopCategory, shopName, address, image });
-        await newShop.save();
-
-        res.status(201).json({ message: "Shop registered successfully", shop: newShop });
+        res.status(201).json({ message: "Shop registered successfully", shop: savedShop });
     } catch (error) {
+        console.log(error)
         res.status(500).json({ error: error.message });
     }
 };

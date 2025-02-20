@@ -3,7 +3,7 @@ import { registerShop, getShopById, updateShop, deleteShop } from "../controller
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
-router.post("/registerShop",registerShop)
+router.post("/registerShop",verifyToken,registerShop)
 router.get("/:shopId",verifyToken,getShopById);
 router.put("/:shopId",verifyToken,updateShop);
 router.delete("/:shopId",verifyToken,deleteShop)
