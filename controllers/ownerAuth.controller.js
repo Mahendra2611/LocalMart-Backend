@@ -1,9 +1,10 @@
 import { Owner } from "../models/owner.model.js";
 import bcrypt from "bcrypt"
+
 import { generateToken } from "../utils/generateToken.js";
  export const signup = async (req, res) => {
     const { name, email, password } = req.body;
-    
+    console.log(name)
     try {
        
         const existingOwner = await Owner.findOne({ email });

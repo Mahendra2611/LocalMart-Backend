@@ -2,7 +2,9 @@ import mongoose from "mongoose";
 import {Item }from "../models/item.model.js";
 import { ShopDetails } from "../models/shopDetails.model.js";
 // Add an item
+
 export const addItem = async (req, res,next) => {
+   
     try {
         const { name, price, quantity, category, image } = req.body;
         const { shopId } = req.params;
@@ -42,6 +44,7 @@ export const addItem = async (req, res,next) => {
 
 // Update an item
 export const updateItem = async (req, res) => {
+    console.log("17")
     try {
         const updatedItem = await Item.findByIdAndUpdate(req.params.itemId, req.body, { new: true });
         if (!updatedItem) return res.status(404).json({ message: "Item not found" });

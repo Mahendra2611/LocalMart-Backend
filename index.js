@@ -7,7 +7,7 @@ import itemRoutes from "./routes/items.route.js"
 import ownerAuthRoutes from "./routes/ownerAuth.route.js"
 import rateLimit from "express-rate-limit"
 import { errorHander } from "./middlewares/errorHandler.middleware.js";
-
+import cors from "cors"
 configDotenv();
 
 const limiter = rateLimit({
@@ -15,14 +15,24 @@ const limiter = rateLimit({
     limit:60,
     message:"To many reques, Please try again later"
 })
+const corsOption = {
+    origin:"http://localhost:5173",
+    methods:["POST","GET","PUT","DELETE"],
+    credential:true,
+}
 const app = e();
-
+app.use(cors(corsOption))
+app.use((req, res, next) => {
+    console.log(`Request: ${req.method} ${req.url}`);
+    next();
+});
 app.use(e.json())
 app.use(limiter)
 app.use(cookieParser())
 
 app.use("/api/shops",shopRoutes);
 app.use("/api/items",itemRoutes)
+
 app.use("/api/ownerAuth",ownerAuthRoutes)
 
 app.use(errorHander)
