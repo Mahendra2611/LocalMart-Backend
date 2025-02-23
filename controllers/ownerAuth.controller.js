@@ -1,7 +1,8 @@
 import { Owner } from "../models/owner.model.js";
 import bcrypt from "bcrypt"
-
+import { ShopDetails } from "../models/shopDetails.model.js";
 import { generateToken } from "../utils/generateToken.js";
+import mongoose from "mongoose";
  export const signup = async (req, res) => {
     const { name, email, password } = req.body;
     console.log(name)
@@ -51,7 +52,12 @@ export const login = async (req, res) => {
         if (!validPassword) return res.status(401).json({ message: "Invalid credentials" });
 
         const accessToken = generateToken({name:owner.name,email:owner.email});
-       
+        const shopId = owner.shopId
+        const shopObjectId = new mongoose.Types.ObjectId(shopId);
+        let shopDetails = await ShopDetails.findOne(
+                   { shopId: shopObjectId },
+                 
+                 );
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -59,7 +65,7 @@ export const login = async (req, res) => {
             maxAge:7*24*60*60*1000,
         });
 
-        res.json({ message : "login successfull" ,name:owner.name,email:owner.email});
+        res.json({ message : "login successfull" ,name:owner.name,email:owner.email,shopDetails:shopDetails});
     } catch (error) {
         res.status(500).json({ error : error.message,message: "Server error" });
     }

@@ -6,34 +6,26 @@ import { ShopDetails } from "../models/shopDetails.model.js";
 export const addItem = async (req, res,next) => {
    
     try {
-        const { name, price, quantity, category, image } = req.body;
+        const { name, price, quantity, category } = req.body;
         const { shopId } = req.params;
-
+        const image = req.file ? req.file.path : null;
+        console.log(shopId)
         const shopObjectId = new mongoose.Types.ObjectId(shopId);
-
+    
         const newItem = new Item({ shopId: shopObjectId, name, category, price, quantity, image });
         const savedNewItem = await newItem.save();
 
      
-        let shopDetails = await ShopDetails.findOne({ shopId: shopObjectId });
-
-        if (shopDetails) {
+        let shopDetails = await ShopDetails.findOneAndUpdate(
+            { shopId: shopObjectId },
+            {
+              $addToSet: { itemsCategories: category, items: savedNewItem._id }
+            },
+            { new: true, upsert: true, setDefaultsOnInsert: true } // upsert creates a new doc if it doesn't exist
+          );
           
-            await ShopDetails.updateOne(
-                { shopId: shopObjectId },
-                { 
-                    $addToSet: { itemsCategories: category, items: savedNewItem._id } 
-                }
-            );
-        } else {
-         
-            shopDetails = new ShopDetails({
-                shopId: shopObjectId,
-                itemsCategories: [category],
-                items: [savedNewItem._id],
-            });
-            await shopDetails.save();
-        }
+          console.log(shopDetails);
+          
 
         res.status(201).json({ message: "Item added successfully", item: savedNewItem, shopDetails });
     } catch (error) {
@@ -44,7 +36,7 @@ export const addItem = async (req, res,next) => {
 
 // Update an item
 export const updateItem = async (req, res) => {
-    console.log("17")
+   
     try {
         const updatedItem = await Item.findByIdAndUpdate(req.params.itemId, req.body, { new: true });
         if (!updatedItem) return res.status(404).json({ message: "Item not found" });
