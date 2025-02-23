@@ -23,7 +23,7 @@ import { generateToken } from "../utils/generateToken.js";
 
         const accessToken = generateToken({name:newOwner.name,email:newOwner.email});
        
-      
+      console.log(newOwner)
 
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
@@ -31,9 +31,10 @@ import { generateToken } from "../utils/generateToken.js";
             sameSite: "Strict",
             maxAge:7*24*60*60*1000,
         });
-
+        console.log("cookie")
         res.status(201).json({ message : "signup successfully" ,name:savedOwner.name,email:savedOwner.email});
     } catch (error) {
+        console.log(error)
         res.status(500).json({ error : error.message , message:"server error"});
     }
 };

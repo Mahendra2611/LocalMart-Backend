@@ -18,7 +18,7 @@ const limiter = rateLimit({
 const corsOption = {
     origin:"http://localhost:5173",
     methods:["POST","GET","PUT","DELETE"],
-    credential:true,
+    credentials: true,
 }
 const app = e();
 app.use(cors(corsOption))

@@ -6,31 +6,32 @@ import bcrypt from "bcrypt";
 // Register a new shop
 export const registerShop = async (req, res) => {
     try {
-        const {user} = req;
-
-        const { ownerName,  shopCategory, shopName, address, image } = req.body;
-        
-        const existingShop = await Owner.findOne({ email:user.email });
-     
-        if (existingShop && existingShop.shopId) return res.status(400).json({ message: "Shop already registered" });
-        const shop = await ShopCategory.findOne({categoryName:shopCategory})
-        const newShop = await Shop.create({ ownerName, shopCategory, shopName, address, image });
-       
-        const savedShop = await newShop.save();
-        if(shop){
-            await ShopCategory.findByIdAndUpdate(shop._id,{$push:{shops:savedShop._id}})
-        }
-        else{
-            await ShopCategory.create({categoryName:shopCategory,$push:{shops:savedShop._id}});
-        }
-        await Owner.findByIdAndUpdate(existingShop._id,{shopId:savedShop._id});
-
-        res.status(201).json({ message: "Shop registered successfully", shop: savedShop });
+      const { user } = req;
+      const { ownerName, shopCategory, shopName, address } = req.body;
+      const image = req.file ? req.file.path : null; // Get Cloudinary URL
+  
+      const existingShop = await Owner.findOne({ email: user.email });
+      console.log(existingShop)
+      if (existingShop?.shopId) return res.status(404).json({ message: "Shop already registered" });
+  console.log("after shop")
+      const shopCategoryDoc = await ShopCategory.findOne({ categoryName: shopCategory });
+      const newShop = await Shop.create({ ownerName, shopCategory, shopName, address, image });
+  
+      if (shopCategoryDoc) {
+        await ShopCategory.findByIdAndUpdate(shopCategoryDoc._id, { $push: { shops: newShop._id } });
+      } else {
+        await ShopCategory.create({ categoryName: shopCategory, shops: [newShop._id] });
+      }
+  
+      await Owner.findByIdAndUpdate(existingShop._id, { shopId: newShop._id });
+  
+      res.status(201).json({ message: "Shop registered successfully", shop: newShop });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ error: error.message });
+      console.log(error);
+      res.status(500).json({ error: error.message });
     }
-};
+  };
+  
 
 // Get shop details by ID
 export const getShopById = async (req, res) => {
