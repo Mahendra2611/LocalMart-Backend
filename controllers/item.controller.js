@@ -1,74 +1,68 @@
-import mongoose from "mongoose";
-import {Item }from "../models/item.model.js";
-import { ShopDetails } from "../models/shopDetails.model.js";
-// Add an item
+import { Item } from "../models/item.model.js";
 
-export const addItem = async (req, res,next) => {
-   
+// 📌 Add a new item
+export const addItems = async (req, res) => {
     try {
-        const { name, price, quantity, category } = req.body;
         const { shopId } = req.params;
-        const image = req.file ? req.file.path : null;
-        console.log(shopId)
-        const shopObjectId = new mongoose.Types.ObjectId(shopId);
-    
-        const newItem = new Item({ shopId: shopObjectId, name, category, price, quantity, image });
-        const savedNewItem = await newItem.save();
+        const items = req.body.items;
 
-     
-        let shopDetails = await ShopDetails.findOneAndUpdate(
-            { shopId: shopObjectId },
-            {
-              $addToSet: { itemsCategories: category, items: savedNewItem._id }
-            },
-            { new: true, upsert: true, setDefaultsOnInsert: true } // upsert creates a new doc if it doesn't exist
-          );
-          
-          console.log(shopDetails);
-          
+        const newItems = items.map(item => ({
+            ...item,
+            shopId,
+            offerPrice: item.discount > 0 ? item.salesPrice - (item.salesPrice * item.discount / 100) : item.salesPrice
+        }));
 
-        res.status(201).json({ message: "Item added successfully", item: savedNewItem, shopDetails });
+        const savedItems = await Item.insertMany(newItems);
+        res.status(201).json({ success: true, message: "Items added successfully", items: savedItems });
     } catch (error) {
-       next(error)
+        res.status(500).json({ success: false, message: "Error adding items", error: error.message });
     }
 };
 
 
-// Update an item
+// 📌 Update an existing item
 export const updateItem = async (req, res) => {
-   
     try {
-        const updatedItem = await Item.findByIdAndUpdate(req.params.itemId, req.body, { new: true });
-        if (!updatedItem) return res.status(404).json({ message: "Item not found" });
+        const { shopId } = req.params;
+        const { name, category, salesPrice, costPrice, quantity, image, discount } = req.body;
 
-        res.json({ message: "Item updated successfully", item: updatedItem });
+        const updatedItem = await Item.findByIdAndUpdate(
+            shopId,
+            {
+                name,
+                category,
+                salesPrice,
+                costPrice,
+                quantity,
+                image,
+                discount,
+                offerPrice: discount > 0 ? salesPrice - (salesPrice * discount / 100) : salesPrice,
+            },
+            { new: true } // Return updated item
+        );
+
+        if (!updatedItem) {
+            return res.status(404).json({ success: false, message: "Item not found" });
+        }
+
+        res.json({ success: true, message: "Item updated successfully", item: updatedItem });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, message: "Error updating item", error: error.message });
     }
 };
 
-// Delete an item
+// 📌 Delete an item
 export const deleteItem = async (req, res) => {
     try {
-        const deletedItem = await Item.findByIdAndDelete(req.params.itemId);
-        if (!deletedItem) return res.status(404).json({ message: "Item not found" });
+        const { shopId } = req.params;
+        const deletedItem = await Item.findByIdAndDelete(shopId);
 
-        res.json({ message: "Item deleted successfully" });
+        if (!deletedItem) {
+            return res.status(404).json({ success: false, message: "Item not found" });
+        }
+
+        res.json({ success: true, message: "Item deleted successfully" });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, message: "Error deleting item", error: error.message });
     }
 };
-export const getItem = async(req,res)=>{
-try {
-    const {shopId} = req.params;
-    if(!shopId){
-        return res.status(400).json({message:"Provide correct shop id"})
-    }
-    console.log(shopId)
-    const shop = await ShopDetails.findOne({shopId:new mongoose.Types.ObjectId(shopId)});
-    console.log(shop)
-    return res.status(200).json({message:"Items fetched successfully",shop})
-} catch (error) {
-    res.status(500).json({ error: error.message });
-}
-}
