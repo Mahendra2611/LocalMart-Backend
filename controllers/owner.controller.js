@@ -11,17 +11,19 @@ export const registerOwner = async (req, res, next) => {
 
   try {
     const { mobileNumber, email ,password, shopImage, ...otherDetails } = req.body;
-
+    console.log("email "+email)
+   
     if (await Owner.findOne({ $or: [{ mobileNumber: mobileNumber }, { email: email }] })) {
         return res.status(400).json({ message: 'Mobile number or email already registered' });
       }
 
-    const uploadedImage = await cloudinary.uploader.upload(shopImage, { folder: 'shops' });
+    //const uploadedImage = await cloudinary.uploader.upload(shopImage, { folder: 'shops' });
 
     const owner = await Owner.create({
       mobileNumber,
       password,
-      shopImage: uploadedImage.secure_url,
+      shopImage,
+      email,
       ...otherDetails,
     });
 
@@ -36,9 +38,9 @@ export const registerOwner = async (req, res, next) => {
 // Login Owner
 export const loginOwner = async (req, res, next) => {
   try {
-    const { mobileNumber, password } = req.body;
+    const { mobileNumber, email, password } = req.body;
 
-    const owner = await Owner.findOne({ mobileNumber });
+    const owner = await Owner.findOne({$or:[{ mobileNumber },{ email}]});
     if (!owner || !(await bcrypt.compare(password, owner.password))) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
