@@ -3,10 +3,10 @@ import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 // import shopRoutes from "./routes/shop.route.js"
-// import itemRoutes from "./routes/items.route.js"
-import owner from "./routes/owner.route.js"
+import productRouter from "./routes/product.js"
+import ownerRouter from "./routes/owner.js"
 import rateLimit from "express-rate-limit"
-import errorHandler from "./middlewares/errorHandler.middleware.js";
+import errorHandler from "./middlewares/errorHandler.js";
 import cors from "cors"
 configDotenv();
 
@@ -31,9 +31,8 @@ app.use(limiter)
 app.use(cookieParser())
 
 // app.use("/api/shops",shopRoutes);
-// app.use("/api/items",itemRoutes)
-
-app.use("/api/owner",owner)
+app.use("/api/product",productRouter)
+app.use("/api/owner",ownerRouter)
 
 app.use(errorHandler)
 //Database connected

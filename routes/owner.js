@@ -1,7 +1,13 @@
 import express from 'express';
-import { registerOwner, loginOwner, getOwnerProfile } from '../controllers/owner.controller.js';
+import {
+  registerOwner,
+  loginOwner,
+  getOwnerProfile,
+  updateShop,
+  deleteShop
+} from  '../controllers/owner.js';
 import { body } from 'express-validator';
-import verifyOwner from '../middlewares/authOwner.middleware.js';
+import Authenticate from '../middlewares/authenticate.js';
 
 const router = express.Router();
 
@@ -11,7 +17,6 @@ router.post(
     body('shopName').notEmpty().withMessage('Shop name is required'),
     body('shopAddress').notEmpty().withMessage('Shop address is required'),
     body('ownerName').notEmpty().withMessage('Owner name is required'),
-    body('email').notEmpty().isEmail().withMessage('Email is required'),
     body('mobileNumber').isMobilePhone().withMessage('Valid mobile number is required'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
     body('shopCategory').notEmpty().withMessage('Shop category is required'),
@@ -21,6 +26,8 @@ router.post(
 );
 
 router.post('/login', loginOwner);
-router.get('/profile', verifyOwner, getOwnerProfile);
+router.get('/profile', Authenticate, getOwnerProfile);
+router.put('/update-shop', Authenticate, updateShop);
+router.delete('/delete-shop', Authenticate, deleteShop);
 
 export default router;
