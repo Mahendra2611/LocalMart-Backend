@@ -1,7 +1,7 @@
 import { Shop } from "../models/shop.model.js";
 import { Item } from "../models/item.model.js";
 import { ShopDetails } from "../models/shopDetails.model.js";
-import { Owner } from "../models/owner.model.js";
+import ownerModel from "../models/owner.model.js";
 
 /** ✅ Add a New Shop */
 export const addShop = async (req, res) => {
