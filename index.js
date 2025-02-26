@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 // import shopRoutes from "./routes/shop.route.js"
 // import itemRoutes from "./routes/items.route.js"
 import owner from "./routes/owner.route.js"
+import customer from "./routes/customer.route.js"
 import rateLimit from "express-rate-limit"
 import errorHandler from "./middlewares/errorHandler.middleware.js";
 import cors from "cors"
@@ -34,6 +35,7 @@ app.use(cookieParser())
 // app.use("/api/items",itemRoutes)
 
 app.use("/api/owner",owner)
+app.use("/api/customer",customer);
 
 app.use(errorHandler)
 //Database connected

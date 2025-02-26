@@ -1,25 +1,47 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
-const itemSchema = new mongoose.Schema({
-    shopId: { type: mongoose.Schema.Types.ObjectId, ref: "Shop", required: true },
-    name: { type: String, required: true },
-    category: { type: String, required: true },
-    salesPrice: { type: Number, required: true },
-    costPrice: { type: Number, required: true },
-    quantity: { type: Number, required: true },
-    image: { type: String, required: true },
-    discount: { type: Number, default: 0 }, // Discount percentage (e.g., 10 for 10% off)
-    offerPrice: { type: Number }, // Final price after discount
+const customerSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Please enter your name'],
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: [true, 'Please enter your email'],
+    unique: true,
+    lowercase: true,
+    match: [/\S+@\S+\.\S+/, 'Please enter a valid email'],
+  },
+  password: {
+    type: String,
+    required: [true, 'Please enter your password'],
+    minlength: [6, 'Password must be at least 8 characters long'],
+    select: false, // Exclude password from query results by default
+  },
+  avatar: {
+    type: String,
+    default: '', // Avatar is optional and can be updated later
+  },
+  orders: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Order',
+    },
+  ],
 }, { timestamps: true });
 
-// Calculate offer price before saving
-itemSchema.pre("save", function (next) {
-    if (this.discount > 0) {
-        this.offerPrice = this.salesPrice - (this.salesPrice * this.discount / 100);
-    } else {
-        this.offerPrice = this.salesPrice;
-    }
-    next();
+// Hash the password before saving
+customerSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
-export const Item = mongoose.model("Item", itemSchema);
+// Method to compare password
+customerSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+export default mongoose.model('Customer', customerSchema);
