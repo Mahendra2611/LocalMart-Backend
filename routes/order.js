@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  createOrder,
+  placeOrder,
   getCustomerOrders,
   getShopOrders,
   updateOrderStatus,
@@ -11,7 +11,7 @@ import { authenticateOwner, authenticateCustomer } from "../middlewares/authenti
 const router = express.Router();
 
 //  Create a new order (Customer)
-router.post("/", authenticateCustomer, createOrder);
+router.post("/", authenticateCustomer, placeOrder);
 
 //  Get orders for a specific customer
 router.get("/customer", authenticateCustomer, getCustomerOrders);

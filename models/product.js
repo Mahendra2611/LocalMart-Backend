@@ -8,6 +8,7 @@ const productSchema = new mongoose.Schema({
     costPrice: { type: Number, required: true },
     quantity: { type: Number, required: true },
     image: { type: String, required: true },
+    lowStockThreshold: { type: Number, default: 5 }, // Default threshold
     discount: { type: Number, default: 0 }, // Discount percentage (e.g., 10 for 10% off)
     offerPrice: { type: Number }, // Final price after discount
 }, { timestamps: true });

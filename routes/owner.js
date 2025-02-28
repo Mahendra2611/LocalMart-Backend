@@ -4,7 +4,8 @@ import {
   loginOwner,
   getOwnerProfile,
   updateShop,
-  deleteShop
+  deleteShop,
+  logoutOwner
 } from  '../controllers/owner.js';
 import { body } from 'express-validator';
 import { authenticateOwner } from '../middlewares/authenticate.js';
@@ -27,6 +28,7 @@ router.post(
 );
 
 router.post('/login', loginOwner);
+router.post("/logout", authenticateOwner, logoutOwner); // Logout route
 router.get('/profile', authenticateOwner, getOwnerProfile);
 router.put('/update-shop', authenticateOwner, updateShop);
 router.delete('/delete-shop', authenticateOwner, deleteShop);

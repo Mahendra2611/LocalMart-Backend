@@ -1,14 +1,15 @@
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
+import { Notification } from "../models/notifications.js"; // Import Notification model
 import { v4 as uuidv4 } from "uuid";
+import { io } from "../index.js"; // Import socket instance
 
-// 🛒 **Create a New Order (Customer)**
-export const createOrder = async (req, res, next) => {
+export const placeOrder = async (req, res, next) => {
   try {
     const { shopId, products, paymentMethod, deliveryAddress } = req.body;
-    const customerId = req.user.id; // Extracted from auth middleware
+    const customerId = req.customerId; // Extracted from auth middleware
 
-    // Fetch product details
+    // Fetch product details from DB
     const productDetails = await Product.find({
       _id: { $in: products.map((item) => item.productId) },
     });
@@ -17,44 +18,107 @@ export const createOrder = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Invalid product IDs" });
     }
 
-    // Calculate total amount & attach product details
     let totalAmount = 0;
-    const finalProducts = products.map((item) => {
+    let totalProfit = 0;
+    const finalProducts = [];
+    const notifications = [];
+
+    // Validate stock & calculate amounts
+    for (const item of products) {
       const product = productDetails.find((p) => p._id.toString() === item.productId);
-      totalAmount += product.offerPrice * item.quantity;
-      return {
+
+      if (!product || product.quantity < item.quantity) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Insufficient stock for ${product?.name || "some products"}` 
+        });
+      }
+
+      const itemTotal = product.offerPrice * item.quantity;
+      const itemProfit = (product.offerPrice - product.costPrice) * item.quantity;
+
+      totalAmount += itemTotal;
+      totalProfit += itemProfit;
+
+      finalProducts.push({
         productId: product._id,
         name: product.name,
-        image: product.image,
         category: product.category,
         quantity: item.quantity,
         price: product.offerPrice,
-      };
-    });
+      });
 
-    // Create order
-    const order = new Order({
+      // Check if stock goes below threshold after purchase
+      const remainingStock = product.quantity - item.quantity;
+      if (remainingStock < 5) {
+        notifications.push({
+          shopId,
+          type: "lowStock",
+          productId: product._id,
+          message: `Low stock alert: ${product.name} has only ${remainingStock} left.`,
+        });
+      }
+    }
+
+    // Create the order
+    const order = await Order.create({
       shopId,
       customerId,
       products: finalProducts,
       totalAmount,
-      profit: totalAmount, // Profit calculation can be improved
+      profit: totalProfit,
       invoiceId: uuidv4(),
       paymentMethod,
       deliveryAddress,
     });
 
-    await order.save();
+    // Deduct stock (Atomic update)
+    const bulkOperations = products.map((item) => ({
+      updateOne: {
+        filter: { _id: item.productId },
+        update: { $inc: { quantity: -item.quantity } },
+      },
+    }));
+    await Product.bulkWrite(bulkOperations);
+
+    // Store order notification
+    notifications.push({
+      shopId,
+      type: "order",
+      message: `New order received! Order ID: ${order._id}`,
+    });
+
+    // Save all notifications to DB
+    if (notifications.length > 0) {
+      await Notification.insertMany(notifications);
+    }
+
+    // Emit real-time order notification
+    io.to(shopId.toString()).emit("newOrder", {
+      message: `New order placed! Order ID: ${order._id}`,
+      order,
+    });
+
+    // Emit low-stock alerts in real-time
+    notifications
+      .filter((notif) => notif.type === "lowStock")
+      .forEach((alert) => {
+        io.to(shopId.toString()).emit("lowStockAlert", { message: alert.message });
+      });
+
     res.status(201).json({ success: true, message: "Order placed successfully", order });
   } catch (error) {
     next(error);
   }
 };
 
-// 👤 **Get Orders for a Customer**
+
+
+
+//  Get Orders for a Customer
 export const getCustomerOrders = async (req, res, next) => {
   try {
-    const customerId = req.user.id;
+    const customerId = req.customerId;
     const orders = await Order.find({ customerId }).populate("shopId", "shopName");
     res.json({ success: true, orders });
   } catch (error) {
@@ -62,10 +126,10 @@ export const getCustomerOrders = async (req, res, next) => {
   }
 };
 
-// 🏪 **Get Orders for a Shop Owner**
+//  **Get Orders for a Shop Owner**
 export const getShopOrders = async (req, res, next) => {
   try {
-    const ownerId = req.user.id;
+    const ownerId = req.ownerId;
     const orders = await Order.find({ shopId: ownerId }).populate("customerId", "name");
     res.json({ success: true, orders });
   } catch (error) {

@@ -2,48 +2,80 @@ import e from "express";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
-// import shopRoutes from "./routes/shop.route.js"
-import productRouter from "./routes/product.js"
-import ownerRouter from "./routes/owner.js"
-import orderRouter from "./routes/order.js"
+import productRouter from "./routes/product.js";
+import ownerRouter from "./routes/owner.js";
+import orderRouter from "./routes/order.js";
 
-import rateLimit from "express-rate-limit"
+import rateLimit from "express-rate-limit";
 import errorHandler from "./middlewares/errorHandler.js";
-import cors from "cors"
+import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
+
 configDotenv();
 
+// Rate Limiter
 const limiter = rateLimit({
-    windowMs:15*60*1000,
-    limit:60,
-    message:"To many reques, Please try again later"
-})
+    windowMs: 15 * 60 * 1000,
+    limit: 60,
+    message: "Too many requests, Please try again later"
+});
+
+// CORS Configuration
 const corsOption = {
-    origin:"http://localhost:5173",
-    methods:["POST","GET","PUT","DELETE"],
+    origin: "http://localhost:5173",
+    methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true,
-}
+};
+
 const app = e();
-app.use(cors(corsOption))
+const server = http.createServer(app); // Create HTTP server
+const io = new Server(server, { cors: corsOption }); // Attach Socket.io to server
+
+// Middleware
+app.use(cors(corsOption));
 app.use((req, res, next) => {
     console.log(`Request: ${req.method} ${req.url}`);
     next();
 });
-app.use(e.json())
-app.use(limiter)
-app.use(cookieParser())
+app.use(e.json());
+app.use(limiter);
+app.use(cookieParser());
 
-app.use("/api/order",orderRouter);
-app.use("/api/product",productRouter)
-app.use("/api/owner",ownerRouter)
+// Pass `io` to routes
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+  });
 
-app.use(errorHandler)
-//Database connected
+// Routes
+app.use("/api/order", orderRouter);
+app.use("/api/product", productRouter);
+app.use("/api/owner", ownerRouter);
+
+// Global Error Handler
+app.use(errorHandler);
+
+// Database Connection
 mongoose.connect(process.env.MONGODB_URL)
-.then(()=>console.log("Database connected"))
-.catch((e)=>console.log(e))
+    .then(() => console.log("Database connected"))
+    .catch((e) => console.log(e));
 
+// Socket.io Events
+io.on("connection", (socket) => {
+    console.log("A user connected:", socket.id);
+
+    socket.on("joinShop", (shopId) => {
+        socket.join(shopId);
+        console.log(`Shop Owner joined room: ${shopId}`);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("User disconnected");
+    });
+});
+export { io }
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT,()=>{
+server.listen(PORT, () => {
     console.log(`Server running on PORT ${PORT}`);
-})
+});
