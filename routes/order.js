@@ -1,19 +1,28 @@
 import express from "express";
 import {
-    createOrder,
-    getOrdersByShop,
-    getOrderById,
-    updateOrderStatus,
-    deleteOrder
+  placeOrder,
+  getCustomerOrders,
+  getShopOrders,
+  updateOrderStatus,
+  updatePaymentStatus,
 } from "../controllers/order.js";
-import { verifyToken } from "../middlewares/authenticate.js";
+import { authenticateOwner, authenticateCustomer } from "../middlewares/authenticate.js";
 
 const router = express.Router();
 
-router.post("/createOrder", verifyToken, createOrder); // ✅ Create Order
-router.get("/order/:shopId", verifyToken, getOrdersByShop); // ✅ Get Orders by Shop ID
-router.get("/order/:orderId", verifyToken, getOrderById); // ✅ Get Order by Order ID
-router.put("/updateOrder/:orderId", verifyToken, updateOrderStatus); // ✅ Update Order Status
-router.delete("/deleteOrder/:orderId", verifyToken, deleteOrder); // ✅ Delete Order
+//  Create a new order (Customer)
+router.post("/", authenticateCustomer, placeOrder);
+
+//  Get orders for a specific customer
+router.get("/customer", authenticateCustomer, getCustomerOrders);
+
+//  Get orders for a shop owner
+router.get("/shop", authenticateOwner, getShopOrders);
+
+//  Update order status (Owner)
+router.put("/:orderId/status", authenticateOwner, updateOrderStatus);
+
+//  Update payment status (Owner)
+router.put("/:orderId/payment", authenticateOwner, updatePaymentStatus);
 
 export default router;

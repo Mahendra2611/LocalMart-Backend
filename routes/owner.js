@@ -4,10 +4,12 @@ import {
   loginOwner,
   getOwnerProfile,
   updateShop,
-  deleteShop
+  deleteShop,
+  logoutOwner
 } from  '../controllers/owner.js';
 import { body } from 'express-validator';
-import Authenticate from '../middlewares/authenticate.js';
+import { authenticateOwner } from '../middlewares/authenticate.js';
+
 
 const router = express.Router();
 
@@ -26,8 +28,9 @@ router.post(
 );
 
 router.post('/login', loginOwner);
-router.get('/profile', Authenticate, getOwnerProfile);
-router.put('/update-shop', Authenticate, updateShop);
-router.delete('/delete-shop', Authenticate, deleteShop);
+router.post("/logout", authenticateOwner, logoutOwner); // Logout route
+router.get('/profile', authenticateOwner, getOwnerProfile);
+router.put('/update-shop', authenticateOwner, updateShop);
+router.delete('/delete-shop', authenticateOwner, deleteShop);
 
 export default router;
