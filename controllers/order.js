@@ -1,105 +1,118 @@
-import Order from "../models/order.model.js";
-import Shop from "../models/shop.model.js";
-import Item from "../models/item.model.js";
-import { v4 as uuidv4 } from "uuid"; // For generating unique invoice IDs
+import { Order } from "../models/order.js";
+import { Product } from "../models/product.js";
+import { v4 as uuidv4 } from "uuid";
 
-/** ✅ Create a New Order */
-export const createOrder = async (req, res) => {
-    try {
-        const { shopId, customerId, items } = req.body;
+// 🛒 **Create a New Order (Customer)**
+export const createOrder = async (req, res, next) => {
+  try {
+    const { shopId, products, paymentMethod, deliveryAddress } = req.body;
+    const customerId = req.user.id; // Extracted from auth middleware
 
-        // Check if shop exists
-        const shop = await Shop.findById(shopId);
-        if (!shop) return res.status(404).json({ message: "Shop not found!" });
+    // Fetch product details
+    const productDetails = await Product.find({
+      _id: { $in: products.map((item) => item.productId) },
+    });
 
-        let totalAmount = 0;
-        let totalProfit = 0;
-
-        // Fetch item details and calculate total amount & profit
-        const updatedItems = await Promise.all(
-            items.map(async (item) => {
-                const product = await Item.findById(item.itemId);
-                if (!product) throw new Error(`Item ${item.itemId} not found`);
-
-                const price = product.offerPrice || product.salesPrice;
-                totalAmount += price * item.quantity;
-                totalProfit += (price - product.costPrice) * item.quantity;
-
-                return { ...item, price };
-            })
-        );
-
-        // Create Order
-        const newOrder = new Order({
-            shopId,
-            customerId,
-            items: updatedItems,
-            totalAmount,
-            profit: totalProfit,
-            status: "Pending",
-            invoiceId: uuidv4(),
-        });
-
-        await newOrder.save();
-        res.status(201).json({ message: "Order created successfully!", order: newOrder });
-    } catch (error) {
-        res.status(500).json({ message: "Error creating order", error: error.message });
+    if (productDetails.length !== products.length) {
+      return res.status(400).json({ success: false, message: "Invalid product IDs" });
     }
+
+    // Calculate total amount & attach product details
+    let totalAmount = 0;
+    const finalProducts = products.map((item) => {
+      const product = productDetails.find((p) => p._id.toString() === item.productId);
+      totalAmount += product.offerPrice * item.quantity;
+      return {
+        productId: product._id,
+        name: product.name,
+        image: product.image,
+        category: product.category,
+        quantity: item.quantity,
+        price: product.offerPrice,
+      };
+    });
+
+    // Create order
+    const order = new Order({
+      shopId,
+      customerId,
+      products: finalProducts,
+      totalAmount,
+      profit: totalAmount, // Profit calculation can be improved
+      invoiceId: uuidv4(),
+      paymentMethod,
+      deliveryAddress,
+    });
+
+    await order.save();
+    res.status(201).json({ success: true, message: "Order placed successfully", order });
+  } catch (error) {
+    next(error);
+  }
 };
 
-/** ✅ Get Orders by Shop ID */
-export const getOrdersByShop = async (req, res) => {
-    try {
-        const { shopId } = req.params;
-        const orders = await Order.find({ shopId }).populate("customerId items.itemId");
-        res.status(200).json({ message: "Orders retrieved successfully!", orders });
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching orders", error: error.message });
-    }
+// 👤 **Get Orders for a Customer**
+export const getCustomerOrders = async (req, res, next) => {
+  try {
+    const customerId = req.user.id;
+    const orders = await Order.find({ customerId }).populate("shopId", "shopName");
+    res.json({ success: true, orders });
+  } catch (error) {
+    next(error);
+  }
 };
 
-/** ✅ Get Order by Order ID */
-export const getOrderById = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const order = await Order.findById(orderId).populate("customerId items.itemId");
-        if (!order) return res.status(404).json({ message: "Order not found!" });
-
-        res.status(200).json({ message: "Order retrieved successfully!", order });
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching order", error: error.message });
-    }
+// 🏪 **Get Orders for a Shop Owner**
+export const getShopOrders = async (req, res, next) => {
+  try {
+    const ownerId = req.user.id;
+    const orders = await Order.find({ shopId: ownerId }).populate("customerId", "name");
+    res.json({ success: true, orders });
+  } catch (error) {
+    next(error);
+  }
 };
 
-/** ✅ Update Order Status */
-export const updateOrderStatus = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const { status } = req.body;
+// ✅ **Update Order Status (Owner)**
+export const updateOrderStatus = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
 
-        const updatedOrder = await Order.findByIdAndUpdate(
-            orderId,
-            { status },
-            { new: true }
-        );
-
-        if (!updatedOrder) return res.status(404).json({ message: "Order not found!" });
-
-        res.status(200).json({ message: "Order status updated!", order: updatedOrder });
-    } catch (error) {
-        res.status(500).json({ message: "Error updating order", error: error.message });
+    if (!["Pending", "Accepted", "Cancelled", "Delivered"].includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status" });
     }
+
+    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.json({ success: true, message: "Order status updated", order });
+  } catch (error) {
+    next(error);
+  }
 };
 
-/** ✅ Delete Order */
-export const deleteOrder = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const deletedOrder = await Order.findByIdAndDelete(orderId);
-        if (!deletedOrder) return res.status(404).json({ message: "Order not found!" });
+// 💰 **Update Payment Status (Owner)**
+export const updatePaymentStatus = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { paymentStatus } = req.body;
 
-        res.status(200).json({ message: "Order deleted successfully!" });
-    } catch (error) {
-        res.status(500).json({ message: "Error deleting order", error: error.message });
+    if (!["Pending", "Paid", "Failed"].includes(paymentStatus)) {
+      return res.status(400).json({ success: false, message: "Invalid payment status" });
     }
+
+    const order = await Order.findByIdAndUpdate(orderId, { paymentStatus }, { new: true });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.json({ success: true, message: "Payment status updated", order });
+  } catch (error) {
+    next(error);
+  }
 };

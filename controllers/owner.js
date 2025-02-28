@@ -1,4 +1,4 @@
-import Owner from '../models/owner.js';
+import {Owner} from '../models/owner.js';
 import bcrypt from 'bcrypt';
 import { validationResult } from 'express-validator';
 import generateToken from '../utils/generateToken.js';
@@ -27,7 +27,7 @@ export const registerOwner = async (req, res, next) => {
       ...otherDetails,
     });
 
-    generateToken(res, owner._id);
+    generateToken(res, owner._id,"owner");
 
     res.status(201).json({ success: true, owner });
   } catch (error) {
@@ -56,7 +56,7 @@ export const loginOwner = async (req, res, next) => {
 // Get Owner Profile (Optimized - No DB Query)
 export const getOwnerProfile = async (req, res, next) => {
   try {
-    const owner = await Owner.findById(req.id).select('-password');
+    const owner = await Owner.findById(req.ownerId).select('-password');
     if (!owner) return res.status(404).json({ message: 'Owner not found' });
 
     res.json(owner);
@@ -70,7 +70,7 @@ export const getOwnerProfile = async (req, res, next) => {
 // Update Shop
 export const updateShop = async (req, res, next) => {
   try {
-    const owner = await Owner.findById(req.id);
+    const owner = await Owner.findById(req.ownerId);
     if (!owner) return res.status(404).json({ message: 'Owner not found' });
 
     const { shopName, shopAddress, shopCategory, itemCategories, shopImage, shopLocation } = req.body;
@@ -97,7 +97,7 @@ export const updateShop = async (req, res, next) => {
 // Delete Shop and related data
 export const deleteShop = async (req, res, next) => {
   try {
-    const owner = await Owner.findById(req.id);
+    const owner = await Owner.findById(req.ownerId);
     if (!owner) return res.status(404).json({ message: 'Owner not found' });
 
     // Delete shop-related data (modify as needed)

@@ -27,4 +27,4 @@ OwnerSchema.pre('save', async function (next) {
   next();
 });
 
-export default mongoose.model('Owner', OwnerSchema);
+export const Owner =  mongoose.model('Owner', OwnerSchema);

@@ -1,18 +1,29 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-const Authenticate = async (req, res, next) => {
-  const token = req.cookies.token;
-console.log(token)
-  if (!token) return res.status(401).json({ message: 'Unauthorized, No token' });
-
+export const authenticateCustomer = (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.id = decoded.id; // Only store ID to avoid DB queries
+    const token = req.cookies.accessToken;
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.customerId =  decoded.id ;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Unauthorized, Invalid token' });
+    return res.status(401).json({ message: "Invalid token" });
   }
 };
 
-export default Authenticate;
+export const authenticateOwner = (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== "owner") return res.status(403).json({ message: "Access denied" });
+
+    req.ownerId =  decoded.id ;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};

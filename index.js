@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 // import shopRoutes from "./routes/shop.route.js"
 import productRouter from "./routes/product.js"
 import ownerRouter from "./routes/owner.js"
+import orderRouter from "./routes/order.js"
+
 import rateLimit from "express-rate-limit"
 import errorHandler from "./middlewares/errorHandler.js";
 import cors from "cors"
@@ -30,7 +32,7 @@ app.use(e.json())
 app.use(limiter)
 app.use(cookieParser())
 
-// app.use("/api/shops",shopRoutes);
+app.use("/api/order",orderRouter);
 app.use("/api/product",productRouter)
 app.use("/api/owner",ownerRouter)
 
