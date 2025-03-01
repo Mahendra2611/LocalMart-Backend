@@ -59,7 +59,7 @@ export const updateProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        res.json({ success: true, message: "Prduct updated successfully", product: updatedProduct });
+        res.status(200).json({ success: true, message: "Prduct updated successfully", product: updatedProduct });
     } catch (error) {
        next(error)
     }
@@ -75,8 +75,23 @@ export const deleteProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        res.json({ success: true, message: "Product deleted successfully" });
+        res.status(200).json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
        next(error)
     }
 };
+
+export const getProducts = async (req, res) => {
+    try {
+      const { shopId } = req.params;
+      const products = await Product.find({ shopId });
+  
+      if (!products.length) {
+        return res.status(404).json({ message: "No products found for this shop." });
+      }
+  
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch products", error: error.message });
+    }
+  };
