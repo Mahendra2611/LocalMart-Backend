@@ -3,7 +3,7 @@ import { Product } from "../models/product.js";
 import { Notification } from "../models/notifications.js"; // Import Notification model
 import { v4 as uuidv4 } from "uuid";
 import { io } from "../index.js"; // Import socket instance
-
+import { updateSalesAnalytics } from "./salesAnalytics.js"; // Adjust the path accordingly
 export const placeOrder = async (req, res, next) => {
   try {
     const { shopId, products, paymentMethod, deliveryAddress } = req.body;
@@ -137,7 +137,10 @@ export const getShopOrders = async (req, res, next) => {
   }
 };
 
-// ✅ **Update Order Status (Owner)**
+
+
+
+
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
@@ -147,10 +150,15 @@ export const updateOrderStatus = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Invalid status" });
     }
 
-    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true }).populate("shopId");
 
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    // Call updateSalesAnalytics only when order is accepted
+    if (status === "Accepted") {
+      await updateSalesAnalytics(order.shopId, order.products, order.totalAmount, order.paymentMethod);
     }
 
     res.json({ success: true, message: "Order status updated", order });
@@ -158,6 +166,8 @@ export const updateOrderStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+
 
 // 💰 **Update Payment Status (Owner)**
 export const updatePaymentStatus = async (req, res, next) => {

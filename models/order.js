@@ -20,7 +20,7 @@ const orderSchema = new mongoose.Schema(
     status: { type: String, enum: ["Pending", "Accepted", "Cancelled", "Delivered"], default: "Pending" },
 
     paymentStatus: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
-    paymentMethod: { type: String, enum: ["COD", "UPI", "Card"], required: true },
+    paymentMethod: { type: String, enum: ["cash","online"], required: true },
 
     invoiceId: { type: String, unique: true, default: uuidv4 }, // Auto-generate unique ID
     deliveryAddress: { type: String, required: true }, // Needed for delivery

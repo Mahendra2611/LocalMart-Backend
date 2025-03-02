@@ -68,7 +68,7 @@ export const loginOwner = async (req, res, next) => {
 
 export const logoutOwner = async (req, res, next) => {
   try {
-    res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) }); // Clear token
+    res.cookie("token", "", { httpOnly: true, expires: new Date(0) }); // Clear token
 
     // 🔹 Emit an event to remove the owner from their room
     if (req.io && req.ownerId) {
