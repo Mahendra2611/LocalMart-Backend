@@ -4,11 +4,11 @@ import { Product } from "../models/product.js";
 export const addProduct = async (req, res, next) => {
     try {
         const {  name, category, salesPrice, costPrice, quantity, image, discount } = req.body;
-
+        const {shopId} = req.params;
         if (!shopId || !name || !category || !salesPrice || !costPrice || !quantity || !image) {
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
-        const shopId = req.id;
+       
         const offerPrice = discount > 0 ? salesPrice - (salesPrice * discount / 100) : salesPrice;
 
         const newProduct = new Product({
@@ -59,7 +59,7 @@ export const updateProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        res.json({ success: true, message: "Prduct updated successfully", product: updatedProduct });
+        res.status(200).json({ success: true, message: "Prduct updated successfully", product: updatedProduct });
     } catch (error) {
        next(error)
     }
@@ -69,14 +69,31 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
     try {
         const { productId } = req.params;
+        console.log("delete")
         const deletedProduct = await Product.findByIdAndDelete(productId);
-
+        console.log(deletedProduct)
         if (!deletedProduct) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        res.json({ success: true, message: "Product deleted successfully" });
+        res.status(200).json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
+        console.log(error)
        next(error)
     }
 };
+
+export const getProducts = async (req, res) => {
+    try {
+      const { shopId } = req.params;
+      const products = await Product.find({ shopId });
+  
+      if (!products.length) {
+        return res.status(404).json({ message: "No products found for this shop." });
+      }
+  
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch products", error: error.message });
+    }
+  };
