@@ -4,49 +4,67 @@ import { Order } from "../models/order.js";
 // Update sales analytics when an order is placed or modified
 export const updateSalesAnalytics = async (shopId, products, profit, paymentMethod) => {
     try {
+        console.log("update analytics called");
+        console.log(shopId)
+        console.log(products)
+        console.log(profit)
+        console.log(paymentMethod)
         const today = new Date().toISOString().split("T")[0]; // Get today's date
 
-        const update = {
-            $inc: { 
-                totalQuantitySold: 0, 
-                totalProfit: profit, 
-                totalSuccessfulOrders: 1 // Increment successful orders count
-            },
-            $setOnInsert: { shopId },
-        };
+        const totalQuantitySold = products.reduce((sum, product) => sum + product.quantity, 0);
 
-        // Update quantity for each product
-        products.forEach(product => {
-            update.$inc.totalQuantitySold += product.quantity;
-        });
+        // Find existing analytics record
+        let analytics = await SalesAnalytics.findOne({ shopId });
 
-        // Track revenue breakdown based on payment method
-        if (paymentMethod === "online") {
-            update.$inc["revenueBreakdown.onlinePayments"] = profit;
-        } else if (paymentMethod === "cash") {
-            update.$inc["revenueBreakdown.cashPayments"] = profit;
-        }
+        if (!analytics) {
+            // If analytics document doesn't exist, create it
+            analytics = await SalesAnalytics.create({
+                shopId,
+                totalSuccessfulOrders: 1,
+                totalQuantitySold,
+                totalProfit: profit,
+                revenueBreakdown: {
+                    onlinePayments: paymentMethod === "online" ? profit : 0,
+                    cashPayments: paymentMethod === "cash" ? profit : 0
+                },
+                dailyStats: [{ date: today, quantitySold: totalQuantitySold, profit }]
+            });
+        } else {
+            // Update main stats
+            analytics.totalSuccessfulOrders += 1;
+            analytics.totalQuantitySold += totalQuantitySold;
+            analytics.totalProfit += profit;
 
-        // Update daily stats
-        update.$set = {
-            "dailyStats.$[element].quantitySold": update.$inc.totalQuantitySold,
-            "dailyStats.$[element].profit": update.$inc.totalProfit
-        };
-
-        await SalesAnalytics.findOneAndUpdate(
-            { shopId },
-            update,
-            {
-                upsert: true,
-                arrayFilters: [{ "element.date": today }],
-                new: true
+            // Update revenue breakdown
+            if (paymentMethod === "online") {
+                analytics.revenueBreakdown.onlinePayments += profit;
+            } else if (paymentMethod === "cash") {
+                analytics.revenueBreakdown.cashPayments += profit;
             }
-        );
+
+            // Find if today's entry exists in dailyStats
+            const existingEntry = analytics.dailyStats.find(stat =>
+                stat.date.toISOString().split("T")[0] === today
+            );
+
+            if (existingEntry) {
+                // If today's entry exists, update it
+                existingEntry.quantitySold += totalQuantitySold;
+                existingEntry.profit += profit;
+            } else {
+                // If today's entry doesn't exist, push a new entry
+                analytics.dailyStats.push({ date: today, quantitySold: totalQuantitySold, profit });
+            }
+
+            // Save updated analytics
+            await analytics.save();
+        }
 
     } catch (error) {
         console.error("Error updating sales analytics:", error);
     }
 };
+
 
 
 // Get sales analytics

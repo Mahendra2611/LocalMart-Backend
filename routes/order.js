@@ -11,16 +11,16 @@ import { authenticateOwner, authenticateCustomer } from "../middlewares/authenti
 const router = express.Router();
 
 //  Create a new order (Customer)
-router.post("/", authenticateCustomer, placeOrder);
+router.post("/", placeOrder);
 
 //  Get orders for a specific customer
 router.get("/customer", authenticateCustomer, getCustomerOrders);
 
 //  Get orders for a shop owner
-router.get("/shop", authenticateOwner, getShopOrders);
+router.get("/shop/:shopId",  getShopOrders);
 
 //  Update order status (Owner)
-router.put("/:orderId/status", authenticateOwner, updateOrderStatus);
+router.put("/:orderId/status", updateOrderStatus);
 
 //  Update payment status (Owner)
 router.put("/:orderId/payment", authenticateOwner, updatePaymentStatus);
