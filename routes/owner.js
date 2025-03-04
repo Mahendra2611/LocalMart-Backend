@@ -9,7 +9,7 @@ import {
 } from  '../controllers/owner.js';
 import { body } from 'express-validator';
 import { authenticateOwner } from '../middlewares/authenticate.js';
-
+import upload from '../middlewares/upload.js';
 
 const router = express.Router();
 
@@ -30,7 +30,9 @@ router.post(
 router.post('/login', loginOwner);
 router.post("/logout", authenticateOwner, logoutOwner); // Logout route
 router.get('/profile', authenticateOwner, getOwnerProfile);
-router.put('/update-shop', authenticateOwner, updateShop);
+
+router.put("/update-shop", authenticateOwner, upload.single("shopImage"), updateShop);
+
 router.delete('/delete-shop', authenticateOwner, deleteShop);
 
 export default router;
