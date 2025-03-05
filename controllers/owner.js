@@ -6,12 +6,17 @@ import cloudinary from '../config/cloudinary.js';
 
 // Register Owner
 export const registerOwner = async (req, res, next) => {
+  console.log("Body:", req.body);
+    console.log("File:", req.file);
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   try {
     const { mobileNumber, email, password,  ...otherDetails } = req.body;
     console.log("email " + email);
+    
+    const shopImageLink = req?.file?.path || req?.file?.url || "";
+  // Ensure a string is assigned
 
     if (await Owner.findOne({ $or: [{ mobileNumber }, { email }] })) {
       return res.status(400).json({ message: 'Mobile number or email already registered' });
@@ -20,7 +25,7 @@ export const registerOwner = async (req, res, next) => {
     const owner = await Owner.create({
       mobileNumber,
       password,
-      
+      shopImage:shopImageLink,
       email,
       ...otherDetails,
     });

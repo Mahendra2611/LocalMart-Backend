@@ -34,11 +34,14 @@ const io = new Server(server, { cors: corsOption }); // Attach Socket.io to serv
 
 // Middleware
 app.use(cors(corsOption));
+app.use(e.json());
+
+
 app.use((req, res, next) => {
     console.log(`Request: ${req.method} ${req.url}`);
     next();
 });
-app.use(e.json());
+
 app.use(limiter);
 app.use(cookieParser());
 

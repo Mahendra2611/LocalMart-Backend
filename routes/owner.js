@@ -15,6 +15,7 @@ const router = express.Router();
 
 router.post(
   '/register',
+  upload.single("shopImage"),
   [
     body('shopName').notEmpty().withMessage('Shop name is required'),
     body('shopAddress').notEmpty().withMessage('Shop address is required'),
@@ -24,6 +25,7 @@ router.post(
     body('shopCategory').notEmpty().withMessage('Shop category is required'),
     body('shopLocation.coordinates').isArray({ min: 2, max: 2 }).withMessage('Valid coordinates are required'),
   ],
+ 
   registerOwner
 );
 
