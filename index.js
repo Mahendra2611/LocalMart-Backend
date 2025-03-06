@@ -4,10 +4,10 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 // import shopRoutes from "./routes/shop.route.js"
 // import itemRoutes from "./routes/items.route.js"
-import owner from "./routes/owner.route.js"
-import customer from "./routes/customer.route.js"
+import owner from "./routes/owner.js"
+import customer from "./routes/customer.js"
 import rateLimit from "express-rate-limit"
-import errorHandler from "./middlewares/errorHandler.middleware.js";
+import errorHandler from "./middlewares/errorHandler.js";
 import cors from "cors"
 configDotenv();
 

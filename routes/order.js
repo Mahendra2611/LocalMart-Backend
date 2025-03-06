@@ -5,8 +5,8 @@ import {
     getOrderById,
     updateOrderStatus,
     deleteOrder
-} from "../controllers/order.controller.js";
-import { verifyToken } from "../middlewares/auth.middleware.js";
+} from "../controllers/order.js";
+import { verifyToken } from "../middlewares/authenticate.js";
 
 const router = express.Router();
 

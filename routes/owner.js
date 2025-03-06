@@ -1,7 +1,13 @@
 import express from 'express';
-import { registerOwner, loginOwner, getOwnerProfile } from '../controllers/owner.controller.js';
+import {
+  registerOwner,
+  loginOwner,
+  getOwnerProfile,
+  updateShop,
+  deleteShop
+} from  '../controllers/owner.js';
 import { body } from 'express-validator';
-import verifyOwner from '../middlewares/authOwner.middleware.js';
+import Authenticate from '../middlewares/authenticate.js';
 
 const router = express.Router();
 
@@ -20,6 +26,8 @@ router.post(
 );
 
 router.post('/login', loginOwner);
-router.get('/profile', verifyOwner, getOwnerProfile);
+router.get('/profile', Authenticate, getOwnerProfile);
+router.put('/update-shop', Authenticate, updateShop);
+router.delete('/delete-shop', Authenticate, deleteShop);
 
 export default router;

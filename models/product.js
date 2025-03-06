@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const itemSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
     shopId: { type: mongoose.Schema.Types.ObjectId, ref: "Shop", required: true },
     name: { type: String, required: true },
     category: { type: String, required: true },
@@ -13,7 +13,7 @@ const itemSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Calculate offer price before saving
-itemSchema.pre("save", function (next) {
+productSchema.pre("save", function (next) {
     if (this.discount > 0) {
         this.offerPrice = this.salesPrice - (this.salesPrice * this.discount / 100);
     } else {
@@ -22,4 +22,4 @@ itemSchema.pre("save", function (next) {
     next();
 });
 
-export const Item = mongoose.model("Item", itemSchema);
+export const Product = mongoose.model("Product", productSchema);
