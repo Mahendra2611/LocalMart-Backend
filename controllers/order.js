@@ -50,7 +50,7 @@ export const placeOrder = async (req, res, next) => {
 
       // Check if stock goes below threshold after purchase
       const remainingStock = product.quantity - item.quantity;
-      if (remainingStock < 5) {
+      if (remainingStock < 10) {
         notifications.push({
           shopId,
           type: "lowStock",
@@ -92,10 +92,10 @@ export const placeOrder = async (req, res, next) => {
     if (notifications.length > 0) {
       await Notification.insertMany(notifications);
     }
-
+    console.log("order id ",order.invoiceId)
     // Emit real-time order notification
     io.to(shopId.toString()).emit("newOrder", {
-      message: `New order placed! Order ID: ${order._id}`,
+      message: `New order placed! Order ID: ${order.invoiceId}`,
       order,
     });
 
@@ -103,7 +103,7 @@ export const placeOrder = async (req, res, next) => {
     notifications
       .filter((notif) => notif.type === "lowStock")
       .forEach((alert) => {
-        io.to(shopId.toString()).emit("lowStockAlert", { message: alert.message });
+        io.to(shopId.toString()).emit("lowStockAlert", { message: alert.message,productId:alert.productId });
       });
 
     res.status(201).json({ success: true, message: "Order placed successfully", order });

@@ -6,6 +6,7 @@ import productRouter from "./routes/product.js";
 import ownerRouter from "./routes/owner.js";
 import orderRouter from "./routes/order.js";
 import analyticsRouter from "./routes/salesAnalytics.js"
+import notificationRouter from "./routes/notification.js"
 import rateLimit from "express-rate-limit";
 import errorHandler from "./middlewares/errorHandler.js";
 import cors from "cors";
@@ -52,6 +53,7 @@ app.use((req, res, next) => {
   });
 
 // Routes
+app.use("/api/notifications",notificationRouter);
 app.use("/api/analytics",analyticsRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/product", productRouter);
