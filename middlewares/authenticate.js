@@ -2,10 +2,10 @@ import jwt from "jsonwebtoken";
 
 export const authenticateCustomer = (req, res, next) => {
   try {
-    const token = req.cookies.accessToken;
+    const token = req.cookies.token;
     if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.customerId =  decoded.id ;
     next();
   } catch (error) {
@@ -18,7 +18,7 @@ export const authenticateOwner = (req, res, next) => {
     const token = req.cookies.accessToken;
     if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     if (decoded.role !== "owner") return res.status(403).json({ message: "Access denied" });
 
     req.ownerId =  decoded.id ;
