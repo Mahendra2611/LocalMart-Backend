@@ -6,12 +6,17 @@ import cloudinary from '../config/cloudinary.js';
 
 // Register Owner
 export const registerOwner = async (req, res, next) => {
+  console.log("Body:", req.body);
+    console.log("File:", req.file);
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   try {
-    const { mobileNumber, email, password, shopImage, ...otherDetails } = req.body;
+    const { mobileNumber, email, password,  ...otherDetails } = req.body;
     console.log("email " + email);
+    
+    const shopImageLink = req?.file?.path || req?.file?.url || "";
+  // Ensure a string is assigned
 
     if (await Owner.findOne({ $or: [{ mobileNumber }, { email }] })) {
       return res.status(400).json({ message: 'Mobile number or email already registered' });
@@ -20,7 +25,7 @@ export const registerOwner = async (req, res, next) => {
     const owner = await Owner.create({
       mobileNumber,
       password,
-      shopImage,
+      shopImage:shopImageLink,
       email,
       ...otherDetails,
     });
@@ -101,28 +106,37 @@ export const getOwnerProfile = async (req, res, next) => {
 export const updateShop = async (req, res, next) => {
   try {
     const owner = await Owner.findById(req.ownerId);
-    if (!owner) return res.status(404).json({ message: 'Owner not found' });
+    if (!owner) return res.status(404).json({ message: "Owner not found" });
 
-    const { shopName, shopAddress, shopCategory, itemCategories, shopImage, shopLocation } = req.body;
+    let { shopName, shopAddress, shopCategory, itemCategories, shopLocation } = req.body;
 
-    if (shopImage) {
-      const uploadedImage = await cloudinary.uploader.upload(shopImage, { folder: 'shops' });
-      owner.shopImage = uploadedImage.secure_url;
+    // Parse `itemCategories` and `shopLocation` safely
+    try {
+      itemCategories = JSON.parse(itemCategories || "[]");
+      shopLocation = JSON.parse(shopLocation || "{}");
+    } catch (error) {
+      return res.status(400).json({ message: "Invalid data format" });
     }
 
+    // Update shop image if a new one is uploaded
+    if (req.file) {
+      owner.shopImage = req.file.path; // Cloudinary automatically uploads and provides a URL
+    }
+
+    // Update other fields only if provided
     owner.shopName = shopName || owner.shopName;
     owner.shopAddress = shopAddress || owner.shopAddress;
     owner.shopCategory = shopCategory || owner.shopCategory;
-    owner.itemCategories = itemCategories || owner.itemCategories;
-    owner.shopLocation = shopLocation || owner.shopLocation;
+    owner.itemCategories = itemCategories.length ? itemCategories : owner.itemCategories;
+    owner.shopLocation = Object.keys(shopLocation).length ? shopLocation : owner.shopLocation;
 
     await owner.save();
-
-    res.json({ success: true, message: 'Shop updated successfully', owner });
+    res.json({ success: true, message: "Shop updated successfully", owner });
   } catch (error) {
     next(error);
   }
 };
+
 
 // Delete Shop and related data
 export const deleteShop = async (req, res, next) => {

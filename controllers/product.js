@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Product } from "../models/product.js";
 
 //  Add a new item
@@ -78,7 +79,7 @@ export const deleteProduct = async (req, res) => {
 
         res.status(200).json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
-        console.log(error)
+        //console.log(error)
        next(error)
     }
 };
@@ -97,11 +98,11 @@ export const getProducts = async (req, res) => {
       res.status(500).json({ message: "Failed to fetch products", error: error.message });
     }
   };
+ 
 
 
 
-
-//   i added 
+//   abh added 
  
 export const getShopItemsByCategory = async (req, res) => {
   try {
@@ -121,3 +122,54 @@ export const getShopItemsByCategory = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
+
+ // Get products whose quantity is below the alert level
+export const getLowStockProducts = async (req, res) => { 
+    try {
+        const { shopId } = req.params;
+        const shopid = new mongoose.Types.ObjectId(shopId);
+
+        console.log(shopId);
+
+        // Use $expr to compare two fields (quantity and lowStockThreshold)
+        const lowStockProducts = await Product.find({ 
+            shopId: shopid, 
+            $expr: { $lt: ["$quantity", "$lowStockThreshold"] } // Compare quantity < lowStockThreshold
+        });
+
+        console.log(lowStockProducts);
+        res.status(200).json(lowStockProducts);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error fetching low stock products", error });
+    }
+};
+
+  
+  // Update product quantities
+  export const updateProductQuantities = async (req, res) => {
+    try {
+      const { products } = req.body;
+  
+      if (!products || products.length === 0) {
+        return res.status(400).json({ message: "No products provided for update" });
+      }
+  
+      // Prepare bulk operations
+      const bulkOperations = products.map((product) => ({
+        updateOne: {
+          filter: { _id: product._id },
+          update: { $set: { quantity: product.newQuantity } },
+        },
+      }));
+  
+      // Perform bulk write operation
+      const result = await Product.bulkWrite(bulkOperations);
+  
+      res.status(200).json({ message: "Product quantities updated successfully", result });
+    } catch (error) {
+      res.status(500).json({ message: "Error updating quantities", error });
+    }
+  };
+  
+ 

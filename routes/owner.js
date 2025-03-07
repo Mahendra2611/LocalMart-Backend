@@ -9,13 +9,15 @@ import {
 } from  '../controllers/owner.js';
 import { body } from 'express-validator';
 import { authenticateOwner } from '../middlewares/authenticate.js';
-import { getAllShops, getShopDetails } from '../controllers/shop.js';
+ import { getAllShops, getShopDetails } from '../controllers/shop.js';
 
-
+ import upload from '../middlewares/upload.js';
+ 
 const router = express.Router();
 
 router.post(
   '/register',
+  upload.single("shopImage"),
   [
     body('shopName').notEmpty().withMessage('Shop name is required'),
     body('shopAddress').notEmpty().withMessage('Shop address is required'),
@@ -25,13 +27,16 @@ router.post(
     body('shopCategory').notEmpty().withMessage('Shop category is required'),
     body('shopLocation.coordinates').isArray({ min: 2, max: 2 }).withMessage('Valid coordinates are required'),
   ],
+ 
   registerOwner
 );
 
 router.post('/login', loginOwner);
 router.post("/logout", authenticateOwner, logoutOwner); // Logout route
 router.get('/profile', authenticateOwner, getOwnerProfile);
-router.put('/update-shop', authenticateOwner, updateShop);
+
+router.put("/update-shop", authenticateOwner, upload.single("shopImage"), updateShop);
+
 router.delete('/delete-shop', authenticateOwner, deleteShop);
 
 

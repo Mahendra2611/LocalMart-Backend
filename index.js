@@ -8,6 +8,7 @@ import productRouter from "./routes/product.js";
 import ownerRouter from "./routes/owner.js";
 import orderRouter from "./routes/order.js";
 import analyticsRouter from "./routes/salesAnalytics.js"
+import notificationRouter from "./routes/notification.js"
 import rateLimit from "express-rate-limit";
 import errorHandler from "./middlewares/errorHandler.js";
 import cors from "cors";
@@ -36,11 +37,14 @@ const io = new Server(server, { cors: corsOption }); // Attach Socket.io to serv
 
 // Middleware
 app.use(cors(corsOption));
+app.use(e.json());
+
+
 app.use((req, res, next) => {
     console.log(`Request: ${req.method} ${req.url}`);
     next();
 });
-app.use(e.json());
+
 app.use(limiter);
 app.use(cookieParser());
 
@@ -52,8 +56,9 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use("/api/customer",customerRouter);
-app.use("/api/analytics",analyticsRouter);
+ app.use("/api/customer",customerRouter);
+ app.use("/api/notifications",notificationRouter);
+ app.use("/api/analytics",analyticsRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/product", productRouter);
 app.use("/api/owner", ownerRouter);
