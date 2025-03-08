@@ -126,6 +126,7 @@ export const placeOrder = async (req, res, next) => {
 //  Get Orders for a Customer
 export const getCustomerOrders = async (req, res, next) => {
   try {
+    // console.log("hello")
     const customerId = req.customerId;
     const orders = await Order.find({ customerId }).populate("shopId", "shopName");
     res.json({ success: true, orders });
