@@ -45,7 +45,9 @@ app.use((req, res, next) => {
     next();
 });
 
+
 // app.use(limiter);
+
 app.use(cookieParser());
 
 
@@ -56,9 +58,11 @@ app.use((req, res, next) => {
 });
 
 // Routes
+
  app.use("/api/customer",customerRouter);
  app.use("/api/notifications",notificationRouter);
  app.use("/api/analytics",analyticsRouter);
+
 app.use("/api/order", orderRouter);
 app.use("/api/product", productRouter);
 app.use("/api/owner", ownerRouter);

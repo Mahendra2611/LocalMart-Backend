@@ -124,6 +124,7 @@ export const getShopItemsByCategory = async (req, res) => {
 };
 
  // Get products whose quantity is below the alert level
+
 export const getLowStockProducts = async (req, res) => { 
     try {
         const { shopId } = req.params;
@@ -171,5 +172,4 @@ export const getLowStockProducts = async (req, res) => {
       res.status(500).json({ message: "Error updating quantities", error });
     }
   };
-  
- 
+

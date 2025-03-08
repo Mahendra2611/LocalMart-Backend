@@ -1,6 +1,8 @@
 import express from "express";
 
+
 import { addProduct, updateProduct, deleteProduct, getProducts,getLowStockProducts,getShopItemsByCategory,updateProductQuantities } from "../controllers/product.js";
+
 import { authenticateOwner } from "../middlewares/authenticate.js";
 
 const router = express.Router();
