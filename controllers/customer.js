@@ -198,3 +198,64 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
+export const addAddress = async (req, res) => {
+  try {
+    const customerId = req.customerId;
+    const { street, city, state, country, postalCode, isDefault } = req.body;
+
+    const customer = await Customer.findById(customerId);
+    if (!customer) return res.status(404).json({ message: "Customer not found" });
+
+    // If new address is default, unset previous default
+    if (isDefault) {
+      customer.address.forEach((addr) => (addr.isDefault = false));
+    }
+
+    // Push new address
+    const newAddress = { street, city, state, country, postalCode, isDefault };
+    customer.address.push(newAddress);
+    await customer.save();
+
+    res.status(201).json({ message: "Address added successfully", address: newAddress });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// ✅ Update an existing address
+export const updateAddress = async (req, res) => {
+  try {
+    const customerId = req.customerId;
+    const { addressId } = req.params;
+    console.log(addressId)
+    const { street, city, state, country, postalCode, isDefault } = req.body;
+    console.log(customerId)
+    const customer = await Customer.findById(customerId);
+    console.log(customer)
+    if (!customer) return res.status(404).json({ message: "Customer not found" });
+
+    const address = customer.address.id(addressId);
+    console.log(address)
+    if (!address) return res.status(404).json({ message: "Address not found" });
+
+    // If setting this address as default, remove default from others
+    if (isDefault) {
+      customer.address.forEach((addr) => (addr.isDefault = false));
+    }
+
+    // Update fields
+    address.street = street;
+    address.city = city;
+    address.state = state;
+    address.country = country;
+    address.postalCode = postalCode;
+    address.isDefault = isDefault;
+
+    await customer.save();
+    res.status(200).json({ message: "Address updated successfully", address });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
