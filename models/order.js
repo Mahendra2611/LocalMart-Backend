@@ -8,6 +8,7 @@ const orderSchema = new mongoose.Schema(
 
     products: [
       {
+        productId:{type:mongoose.Schema.Types.ObjectId,ref:"Product",required:true},
         name: { type: String, required: true }, // Snapshot of product name
         category: { type: String, required: true }, // Store product category
         quantity: { type: Number, required: true },
@@ -20,7 +21,7 @@ const orderSchema = new mongoose.Schema(
     status: { type: String, enum: ["Pending", "Accepted", "Cancelled", "Delivered"], default: "Pending" },
 
     paymentStatus: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
-    paymentMethod: { type: String, enum: ["cash","online"], required: true },
+    paymentMethod: { type: String, enum: ["cash","online","COD","UPI"], required: true },
 
     invoiceId: { type: String, unique: true, default: uuidv4 }, // Auto-generate unique ID
     deliveryAddress: { type: String, required: true }, // Needed for delivery

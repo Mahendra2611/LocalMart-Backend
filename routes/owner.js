@@ -9,7 +9,11 @@ import {
 } from  '../controllers/owner.js';
 import { body } from 'express-validator';
 import { authenticateOwner } from '../middlewares/authenticate.js';
-import upload from '../middlewares/upload.js';
+
+ import { getAllShops, getShopDetails } from '../controllers/shop.js';
+
+ import upload from '../middlewares/upload.js';
+ 
 
 const router = express.Router();
 
@@ -36,5 +40,10 @@ router.get('/profile', authenticateOwner, getOwnerProfile);
 router.put("/update-shop", authenticateOwner, upload.single("shopImage"), updateShop);
 
 router.delete('/delete-shop', authenticateOwner, deleteShop);
+
+
+// i added 
+router.get('/getAllShops',getAllShops);
+router.get('/:shopId',getShopDetails);
 
 export default router;

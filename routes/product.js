@@ -1,5 +1,8 @@
 import express from "express";
-import { addProduct, updateProduct, deleteProduct, getProducts,getLowStockProducts,updateProductQuantities } from "../controllers/product.js";
+
+
+import { addProduct, updateProduct, deleteProduct, getProducts,getLowStockProducts,getShopItemsByCategory,updateProductQuantities } from "../controllers/product.js";
+
 import { authenticateOwner } from "../middlewares/authenticate.js";
 
 const router = express.Router();
@@ -12,4 +15,7 @@ router.get("/low-stock/:shopId", getLowStockProducts);
 router.put("/update-quantities", updateProductQuantities);// Update product quantities
 
 
+
+// i added 
+router.get("/:shopId/items", getShopItemsByCategory);
 export default router;

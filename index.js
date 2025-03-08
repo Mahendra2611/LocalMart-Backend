@@ -2,6 +2,8 @@ import e from "express";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
+
+import customerRouter from "./routes/customer.js"
 import productRouter from "./routes/product.js";
 import ownerRouter from "./routes/owner.js";
 import orderRouter from "./routes/order.js";
@@ -16,15 +18,15 @@ import { Server } from "socket.io";
 configDotenv();
 
 // Rate Limiter
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 60,
-    message: "Too many requests, Please try again later"
-});
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000,
+//     limit: 60,
+//     message: "Too many requests, Please try again later"
+// });
 
 // CORS Configuration
 const corsOption = {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5174","http://localhost:5173"],
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true,
 };
@@ -43,18 +45,24 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(limiter);
+
+// app.use(limiter);
+
 app.use(cookieParser());
+
 
 // Pass `io` to routes
 app.use((req, res, next) => {
     req.io = io;
     next();
-  });
+});
 
 // Routes
-app.use("/api/notifications",notificationRouter);
-app.use("/api/analytics",analyticsRouter);
+
+ app.use("/api/customer",customerRouter);
+ app.use("/api/notifications",notificationRouter);
+ app.use("/api/analytics",analyticsRouter);
+
 app.use("/api/order", orderRouter);
 app.use("/api/product", productRouter);
 app.use("/api/owner", ownerRouter);
