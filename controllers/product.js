@@ -98,7 +98,33 @@ export const getProducts = async (req, res) => {
       res.status(500).json({ message: "Failed to fetch products", error: error.message });
     }
   };
-// Get products whose quantity is below the alert level
+ 
+
+
+
+//   abh added 
+ 
+export const getShopItemsByCategory = async (req, res) => {
+  try {
+      const { shopId } = req.params;
+      const { category } = req.query;
+    //   console.log(shopId)
+
+    // Find products by shopId and category
+    const products = await Product.find({ shopId, category });
+
+    if (!products.length) {
+      return res.status(404).json({ success: false, message: "No products found for this category in the shop" });
+    }
+
+    res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
+ // Get products whose quantity is below the alert level
+
 export const getLowStockProducts = async (req, res) => { 
     try {
         const { shopId } = req.params;
@@ -146,4 +172,4 @@ export const getLowStockProducts = async (req, res) => {
       res.status(500).json({ message: "Error updating quantities", error });
     }
   };
-  
+

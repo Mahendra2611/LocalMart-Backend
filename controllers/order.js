@@ -4,29 +4,37 @@ import { Notification } from "../models/notifications.js"; // Import Notificatio
 import { v4 as uuidv4 } from "uuid";
 import { io } from "../index.js"; // Import socket instance
 import { updateSalesAnalytics } from "./salesAnalytics.js"; // Adjust the path accordingly
+import mongoose from "mongoose";
+
+
+
 export const placeOrder = async (req, res, next) => {
   try {
+
+
     const { customerId,shopId, products, paymentMethod, deliveryAddress } = req.body;
     //const customerId = req.customerId; // Extracted from auth middleware
-
+    console.log("first",products)
+    const custid=new mongoose.Types.ObjectId(customerId);
+    const shopid=new mongoose.Types.ObjectId(shopId);
     // Fetch product details from DB
     const productDetails = await Product.find({
       _id: { $in: products.map((item) => item.productId) },
     });
-
+    console.log(productDetails)
     if (productDetails.length !== products.length) {
       return res.status(400).json({ success: false, message: "Invalid product IDs" });
     }
-
+    
     let totalAmount = 0;
     let totalProfit = 0;
     const finalProducts = [];
     const notifications = [];
-
+    
     // Validate stock & calculate amounts
     for (const item of products) {
       const product = productDetails.find((p) => p._id.toString() === item.productId);
-
+      
       if (!product || product.quantity < item.quantity) {
         return res.status(400).json({ 
           success: false, 
@@ -39,7 +47,7 @@ export const placeOrder = async (req, res, next) => {
 
       totalAmount += itemTotal;
       totalProfit += itemProfit;
-
+      
       finalProducts.push({
         productId: product._id,
         name: product.name,
@@ -47,7 +55,7 @@ export const placeOrder = async (req, res, next) => {
         quantity: item.quantity,
         price: product.offerPrice,
       });
-
+      
       // Check if stock goes below threshold after purchase
       const remainingStock = product.quantity - item.quantity;
       if (remainingStock < 10) {
@@ -59,11 +67,12 @@ export const placeOrder = async (req, res, next) => {
         });
       }
     }
-
+    
+    console.log("Second")
     // Create the order
     const order = await Order.create({
-      shopId,
-      customerId,
+      shopId:shopid,
+      customerId:custid,
       products: finalProducts,
       totalAmount,
       profit: totalProfit,
