@@ -18,11 +18,11 @@ import { Server } from "socket.io";
 configDotenv();
 
 // Rate Limiter
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 60,
-    message: "Too many requests, Please try again later"
-});
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000,
+//     limit: 60,
+//     message: "Too many requests, Please try again later"
+// });
 
 // CORS Configuration
 const corsOption = {
@@ -45,7 +45,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(limiter);
+// app.use(limiter);
 app.use(cookieParser());
 
 
