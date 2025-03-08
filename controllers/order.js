@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 export const placeOrder = async (req, res, next) => {
   try {
 
+
     const { customerId,shopId, products, paymentMethod, deliveryAddress } = req.body;
     //const customerId = req.customerId; // Extracted from auth middleware
     console.log("first",products)

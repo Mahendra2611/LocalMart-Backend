@@ -9,10 +9,12 @@ import {
 } from  '../controllers/owner.js';
 import { body } from 'express-validator';
 import { authenticateOwner } from '../middlewares/authenticate.js';
+
  import { getAllShops, getShopDetails } from '../controllers/shop.js';
 
  import upload from '../middlewares/upload.js';
  
+
 const router = express.Router();
 
 router.post(
