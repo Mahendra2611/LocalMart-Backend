@@ -11,7 +11,7 @@ const OwnerSchema = new mongoose.Schema(
     password: { type: String, required: true },
     shopCategory: { type: String, required: true },
     itemCategories: { type: [String], default: [] },
-    shopImage: { type: String, required: true },
+    shopImage: { type: String,  },
     shopLocation: {
       type: { type: String, enum: ['Point'], default: 'Point' },
       coordinates: { type: [Number], required: true },

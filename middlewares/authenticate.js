@@ -15,10 +15,11 @@ export const authenticateCustomer = (req, res, next) => {
 
 export const authenticateOwner = (req, res, next) => {
   try {
-    const token = req.cookies.accessToken;
+    const token = req.cookies.token;
+    console.log(token)
     if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     if (decoded.role !== "owner") return res.status(403).json({ message: "Access denied" });
 
     req.ownerId =  decoded.id ;

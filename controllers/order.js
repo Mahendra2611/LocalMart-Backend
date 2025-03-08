@@ -6,8 +6,8 @@ import { io } from "../index.js"; // Import socket instance
 import { updateSalesAnalytics } from "./salesAnalytics.js"; // Adjust the path accordingly
 export const placeOrder = async (req, res, next) => {
   try {
-    const { shopId, products, paymentMethod, deliveryAddress } = req.body;
-    const customerId = req.customerId; // Extracted from auth middleware
+    const { customerId,shopId, products, paymentMethod, deliveryAddress } = req.body;
+    //const customerId = req.customerId; // Extracted from auth middleware
 
     // Fetch product details from DB
     const productDetails = await Product.find({
@@ -50,7 +50,7 @@ export const placeOrder = async (req, res, next) => {
 
       // Check if stock goes below threshold after purchase
       const remainingStock = product.quantity - item.quantity;
-      if (remainingStock < 5) {
+      if (remainingStock < 10) {
         notifications.push({
           shopId,
           type: "lowStock",
@@ -92,10 +92,10 @@ export const placeOrder = async (req, res, next) => {
     if (notifications.length > 0) {
       await Notification.insertMany(notifications);
     }
-
+    console.log("order id ",order.invoiceId)
     // Emit real-time order notification
     io.to(shopId.toString()).emit("newOrder", {
-      message: `New order placed! Order ID: ${order._id}`,
+      message: `New order placed! Order ID: ${order.invoiceId}`,
       order,
     });
 
@@ -103,7 +103,7 @@ export const placeOrder = async (req, res, next) => {
     notifications
       .filter((notif) => notif.type === "lowStock")
       .forEach((alert) => {
-        io.to(shopId.toString()).emit("lowStockAlert", { message: alert.message });
+        io.to(shopId.toString()).emit("lowStockAlert", { message: alert.message,productId:alert.productId });
       });
 
     res.status(201).json({ success: true, message: "Order placed successfully", order });
@@ -129,8 +129,9 @@ export const getCustomerOrders = async (req, res, next) => {
 //  **Get Orders for a Shop Owner**
 export const getShopOrders = async (req, res, next) => {
   try {
-    const ownerId = req.ownerId;
-    const orders = await Order.find({ shopId: ownerId }).populate("customerId", "name");
+    const ownerId = req.params.shopId;
+    console.log("shopId " + ownerId)
+    const orders = await Order.find({ shopId: ownerId });
     res.json({ success: true, orders });
   } catch (error) {
     next(error);
@@ -144,20 +145,24 @@ export const getShopOrders = async (req, res, next) => {
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
+    console.log("order id " + orderId)
     const { status } = req.body;
-
+    console.log(status)
     if (!["Pending", "Accepted", "Cancelled", "Delivered"].includes(status)) {
       return res.status(400).json({ success: false, message: "Invalid status" });
     }
 
-    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true }).populate("shopId");
+    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
 
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
     // Call updateSalesAnalytics only when order is accepted
+   
     if (status === "Accepted") {
+      console.log("update from order called")
+      console.log(order)
       await updateSalesAnalytics(order.shopId, order.products, order.totalAmount, order.paymentMethod);
     }
 

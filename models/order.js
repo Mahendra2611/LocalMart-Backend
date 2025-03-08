@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid"; // Install with `npm i uuid`
 
 const orderSchema = new mongoose.Schema(
   {
-    shopId: { type: mongoose.Schema.Types.ObjectId, ref: "Shop", required: true },
+    shopId: { type: mongoose.Schema.Types.ObjectId, ref: "Owner", required: true },
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
 
     products: [
@@ -25,6 +25,7 @@ const orderSchema = new mongoose.Schema(
     invoiceId: { type: String, unique: true, default: uuidv4 }, // Auto-generate unique ID
     deliveryAddress: { type: String, required: true }, // Needed for delivery
     estimatedDeliveryDate: { type: Date }, // Optional
+    estimatedDeliveryTime: { type: String }
 
   },
   { timestamps: true }
