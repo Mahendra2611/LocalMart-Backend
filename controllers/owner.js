@@ -6,15 +6,14 @@ import cloudinary from '../config/cloudinary.js';
 
 // Register Owner
 export const registerOwner = async (req, res, next) => {
-  console.log("Body:", req.body);
-    console.log("File:", req.file);
+ 
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   try {
     const { mobileNumber, email, password,  ...otherDetails } = req.body;
-    console.log("email " + email);
-    
+    const salt = await bcrypt.genSalt(saltRounds)
+     const pass = await bcrypt.hash(password,salt);
     const shopImageLink = req?.file?.path || req?.file?.url || "";
   // Ensure a string is assigned
 
@@ -24,7 +23,7 @@ export const registerOwner = async (req, res, next) => {
 
     const owner = await Owner.create({
       mobileNumber,
-      password,
+      password:pass,
       shopImage:shopImageLink,
       email,
       ...otherDetails,
@@ -32,7 +31,7 @@ export const registerOwner = async (req, res, next) => {
 
     generateToken(res, owner._id, "owner");
 
-    // 🔹 Emit a socket event to join the room
+    //  Emit a socket event to join the room
     if (req.io) {
       req.io.to(owner._id.toString()).emit("owner_signed_up", {
         message: `Welcome, ${owner.shopName}! Your shop is now active.`,
