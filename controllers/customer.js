@@ -87,6 +87,7 @@ if (Array.isArray(address)) {
 
 // Login Controller (No changes needed)
 export const loginCustomer = async (req, res) => {
+  console.log("called")
   try {
     const { identifier, password, location } = req.body; 
 
