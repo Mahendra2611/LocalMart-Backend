@@ -9,6 +9,7 @@ import ownerRouter from "./routes/owner.js";
 import orderRouter from "./routes/order.js";
 import analyticsRouter from "./routes/salesAnalytics.js"
 import notificationRouter from "./routes/notification.js"
+import dashboardRouter from "./routes/dashboard.js"
 import rateLimit from "express-rate-limit";
 import errorHandler from "./middlewares/errorHandler.js";
 import cors from "cors";
@@ -26,7 +27,7 @@ configDotenv();
 
 // CORS Configuration
 const corsOption = {
-    origin: ["http://localhost:5174","http://localhost:5173"],
+    origin: ["http://localhost:5174","http://192.168.121.82:5173","http://localhost:5173","http://192.168.121.82:5174"],
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true,
 };
@@ -58,17 +59,19 @@ app.use((req, res, next) => {
 });
 
 // Routes
-
+ app.get("/test",(req,res)=>{
+    return res.json("tested success")
+ })
  app.use("/api/customer",customerRouter);
  app.use("/api/notifications",notificationRouter);
  app.use("/api/analytics",analyticsRouter);
-
+ app.use("/api/dashboard", dashboardRouter);
 app.use("/api/order", orderRouter);
-app.use("/api/product", productRouter);
+app.use("/api/products", productRouter);
 app.use("/api/owner", ownerRouter);
 
 // Global Error Handler
-app.use(errorHandler);
+
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URL)
@@ -83,13 +86,19 @@ io.on("connection", (socket) => {
         socket.join(shopId);
         console.log(`Shop Owner joined room: ${shopId}`);
     });
-
+    socket.on("joinCustomer",(customerId)=>{
+        socket.join(customerId)
+        console.log(`Customer joined room: ${customerId}`)
+    })
     socket.on("disconnect", () => {
         console.log("User disconnected");
     });
 });
 export { io }
+app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0",() => {
     console.log(`Server running on PORT ${PORT}`);
 });
+
+

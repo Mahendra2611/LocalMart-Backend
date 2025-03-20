@@ -1,17 +1,40 @@
 import { Owner } from '../models/owner.js';
 
+
 export const getAllShops = async (req, res) => {
   try { 
-    const owners = await Owner.find();
+    const { latitude, longitude } = req.query; 
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ success: false, message: "User location required" });
+    }
+
+    const userLocation = {
+      type: "Point",
+      coordinates: [parseFloat(latitude),parseFloat(longitude) ], // official [longitude, latitude] but this doesn't work , so using [latitude,longitude]
+    };
+    console.log(userLocation)
+    const shops = await Owner.find({
+      shopLocation: {
+        $near: {
+          $geometry: userLocation,
+          $maxDistance: 5000, // 5km radius in meters
+        },
+      },
+    });
+    console.log(shops)
     res.status(200).json({ 
-        success: true,
-        message:"All Shops are Fetched Successfully",
-         data: owners });
+      success: true,
+      message: "Shops within 5km radius fetched successfully",
+      data: shops,
+    });
+
   } catch (error) {
-    console.error('Error fetching owners:', error);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error("Error fetching shops:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 
 export const getShopDetails = async (req, res) => {
