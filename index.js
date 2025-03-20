@@ -64,7 +64,7 @@ app.use((req, res, next) => {
  app.use("/api/analytics",analyticsRouter);
 
 app.use("/api/order", orderRouter);
-app.use("/api/product", productRouter);
+app.use("/api/products", productRouter);
 app.use("/api/owner", ownerRouter);
 
 // Global Error Handler

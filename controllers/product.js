@@ -93,7 +93,10 @@ export const getProducts = async (req, res) => {
         return res.status(404).json({ message: "No products found for this shop." });
       }
   
-      res.status(200).json(products);
+      res.status(200).json({
+        success:true,
+        products
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch products", error: error.message });
     }
