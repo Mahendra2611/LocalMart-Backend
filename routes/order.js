@@ -14,7 +14,7 @@ const router = express.Router();
 router.post("/", placeOrder);
 
 //  Get orders for a specific customer
-router.get("/customer",  getCustomerOrders);
+router.get("/customer", authenticateCustomer, getCustomerOrders);
 
 //  Get orders for a shop owner
 router.get("/shop/:shopId",  getShopOrders);

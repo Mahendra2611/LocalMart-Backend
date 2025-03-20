@@ -1,5 +1,6 @@
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
+import { Owner } from "../models/owner.js";
 import { Notification } from "../models/notifications.js"; // Import Notification model
 import { v4 as uuidv4 } from "uuid";
 import { io } from "../index.js"; // Import socket instance
@@ -121,7 +122,9 @@ export const placeOrder = async (req, res, next) => {
 export const getCustomerOrders = async (req, res, next) => {
   try {
     const customerId = req.customerId;
+    console.log(customerId)
     const orders = await Order.find({ customerId }).populate("shopId", "shopName");
+    console.log(orders)
     res.json({ success: true, orders });
   } catch (error) {
     next(error);
@@ -166,8 +169,18 @@ export const updateOrderStatus = async (req, res, next) => {
       console.log("update from order called")
       console.log(order)
       await updateSalesAnalytics(order.shopId, order.products, order.totalAmount, order.paymentMethod);
-    }
+    } 
+    const shopName =  Owner.findById(order.shopId).select('shopName')
+    const customerId = order.customerId;
+io.to(customerId.toString()).emit("OrderStatusUpdated",{
+message:`Order at ${shopName} has been ${status}`
+})
 
+await Notification.insertOne({
+  customerId:Order.customerId,
+  type:"order",
+  message:`Order at ${shopName} has been ${status}`,
+})
     res.json({ success: true, message: "Order status updated", order });
   } catch (error) {
     next(error);
