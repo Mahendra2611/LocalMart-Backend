@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 import { Product } from "../models/product.js";
-
+import cloudinary from "../config/cloudinary.js";
+import { Owner } from "../models/owner.js";
 //  Add a new item
 export const addProduct = async (req, res, next) => {
     try {
         const {  name, category, salesPrice, costPrice, quantity, image, discount } = req.body;
-        const {shopId} = req.params;
-        if (!shopId || !name || !category || !salesPrice || !costPrice || !quantity || !image) {
+        const shopId = req.ownerId;
+        const imageLink = req?.file?.path;
+        if (!shopId || !name || !category || !salesPrice || !costPrice || !quantity ) {
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
        
@@ -19,7 +21,7 @@ export const addProduct = async (req, res, next) => {
             salesPrice,
             costPrice,
             quantity,
-            image,
+            image:imageLink,
             discount,
             offerPrice,
         });
@@ -36,11 +38,21 @@ export const addProduct = async (req, res, next) => {
 
 
 //  Update an existing item
-export const updateProduct = async (req, res) => {
+export const updateProduct = async (req, res, next) => {
     try {
         const { productId } = req.params;
-        const { name, category, salesPrice, costPrice, quantity, image, discount } = req.body;
-
+        const { name, category, salesPrice, costPrice, quantity, image, discount ,oldImageLink } = req.body;
+        console.log(oldImageLink)
+        console.log(req.file)
+        let imageLink = oldImageLink;
+        if (req.file && oldImageLink) {
+          const publicId = oldImageLink.split('/').pop().split('.')[0]; // Extract public ID from URL
+          await cloudinary.uploader.destroy(publicId);
+         
+      }
+      if(req.file){
+        imageLink = req.file.path||"";
+      }
         const updatedProduct = await Product.findByIdAndUpdate(
             productId,
             {
@@ -49,7 +61,7 @@ export const updateProduct = async (req, res) => {
                 salesPrice,
                 costPrice,
                 quantity,
-                image,
+                image:imageLink,
                 discount,
                 offerPrice: discount > 0 ? salesPrice - (salesPrice * discount / 100) : salesPrice,
             },
@@ -70,9 +82,9 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
     try {
         const { productId } = req.params;
-        console.log("delete")
+        //console.log("delete")
         const deletedProduct = await Product.findByIdAndDelete(productId);
-        console.log(deletedProduct)
+        //console.log(deletedProduct)
         if (!deletedProduct) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
@@ -86,7 +98,7 @@ export const deleteProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
     try {
-      const { shopId } = req.params;
+      const  shopId  = req.ownerId;
       const products = await Product.find({ shopId });
   
       if (!products.length) {
@@ -105,16 +117,16 @@ export const getProducts = async (req, res) => {
 
 
 
-//   abh added 
+//  customer added 
  
-export const getShopItemsByCategory = async (req, res) => {
+export const getShopProduct = async (req, res) => {
   try {
       const { shopId } = req.params;
-      const { category } = req.query;
+      //const { category } = req.query;
     //   console.log(shopId)
 
     // Find products by shopId and category
-    const products = await Product.find({ shopId, category });
+    const products = await Product.find({ shopId });
 
     if (!products.length) {
       return res.status(404).json({ success: false, message: "No products found for this category in the shop" });
@@ -130,7 +142,7 @@ export const getShopItemsByCategory = async (req, res) => {
 
 export const getLowStockProducts = async (req, res) => { 
     try {
-        const { shopId } = req.params;
+        const  shopId  = req.ownerId;
         const shopid = new mongoose.Types.ObjectId(shopId);
 
         console.log(shopId);
@@ -175,4 +187,13 @@ export const getLowStockProducts = async (req, res) => {
       res.status(500).json({ message: "Error updating quantities", error });
     }
   };
+  export const getCategories = async(req,res,next)=>{
+    const shopId = req.ownerId;
+    try {
+      const categories = await Owner.findById(shopId).select("itemCategories");
+      return res.status(200).json({categories})
+    } catch (error) {
+      next(error)
+    }
+  }
 

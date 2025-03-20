@@ -1,38 +1,37 @@
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
+import { Owner } from "../models/owner.js";
 import { Notification } from "../models/notifications.js"; // Import Notification model
 import { v4 as uuidv4 } from "uuid";
 import { io } from "../index.js"; // Import socket instance
 import { updateSalesAnalytics } from "./salesAnalytics.js"; // Adjust the path accordingly
 import mongoose from "mongoose";
 
-
-
 export const placeOrder = async (req, res, next) => {
   try {
     const { customerId,shopId, products, paymentMethod, deliveryAddress } = req.body;
     //const customerId = req.customerId; // Extracted from auth middleware
-    console.log("first",products)
-    const custid=new mongoose.Types.ObjectId(customerId);
-    const shopid=new mongoose.Types.ObjectId(shopId);
+
     // Fetch product details from DB
+    console.log("order cust ",customerId)
+    console.log("order shop ",shopId)
     const productDetails = await Product.find({
       _id: { $in: products.map((item) => item.productId) },
     });
-    console.log(productDetails)
+
     if (productDetails.length !== products.length) {
       return res.status(400).json({ success: false, message: "Invalid product IDs" });
     }
-    
+
     let totalAmount = 0;
     let totalProfit = 0;
     const finalProducts = [];
     const notifications = [];
-    
+
     // Validate stock & calculate amounts
     for (const item of products) {
       const product = productDetails.find((p) => p._id.toString() === item.productId);
-      
+
       if (!product || product.quantity < item.quantity) {
         return res.status(400).json({ 
           success: false, 
@@ -45,7 +44,7 @@ export const placeOrder = async (req, res, next) => {
 
       totalAmount += itemTotal;
       totalProfit += itemProfit;
-      
+
       finalProducts.push({
         productId: product._id,
         name: product.name,
@@ -53,7 +52,7 @@ export const placeOrder = async (req, res, next) => {
         quantity: item.quantity,
         price: product.offerPrice,
       });
-      
+
       // Check if stock goes below threshold after purchase
       const remainingStock = product.quantity - item.quantity;
       if (remainingStock < 10) {
@@ -65,12 +64,11 @@ export const placeOrder = async (req, res, next) => {
         });
       }
     }
-    
-    console.log("Second")
+
     // Create the order
     const order = await Order.create({
-      shopId:shopid,
-      customerId:custid,
+      shopId,
+      customerId,
       products: finalProducts,
       totalAmount,
       profit: totalProfit,
@@ -126,8 +124,13 @@ export const placeOrder = async (req, res, next) => {
 export const getCustomerOrders = async (req, res, next) => {
   try {
     // console.log("hello")
-    const customerId = req.customerId;
+    // console.log(req.cust);
+    
+    const cust = req.customerId;
+    const customerId =new mongoose.Types.ObjectId(cust)
+    console.log(customerId)
     const orders = await Order.find({ customerId }).populate("shopId", "shopName");
+    // console.log(orders)
     res.json({ success: true, orders });
   } catch (error) {
     next(error);
@@ -167,13 +170,23 @@ export const updateOrderStatus = async (req, res, next) => {
     }
 
     // Call updateSalesAnalytics only when order is accepted
-   
+   console.log(order)
     if (status === "Accepted") {
       console.log("update from order called")
-      console.log(order)
+      // console.log(order)
       await updateSalesAnalytics(order.shopId, order.products, order.totalAmount, order.paymentMethod);
-    }
+    } 
+    const shopName =  Owner.findById(order.shopId).select('shopName')
+    const customerId = order.customerId;
+io.to(customerId.toString()).emit("OrderStatusUpdated",{
+message:`Order at ${shopName} has been ${status}`
+})
 
+await Notification.insertOne({
+  customerId:Order.customerId,
+  type:"order",
+  message:`Order at ${shopName} has been ${status}`,
+})
     res.json({ success: true, message: "Order status updated", order });
   } catch (error) {
     next(error);
@@ -182,7 +195,7 @@ export const updateOrderStatus = async (req, res, next) => {
 
 
 
-// 💰 **Update Payment Status (Owner)**
+//  **Update Payment Status (Owner)**
 export const updatePaymentStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;

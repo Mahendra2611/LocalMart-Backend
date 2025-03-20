@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema(
   {
-    shopId: { type: mongoose.Schema.Types.ObjectId, ref: "Shop", required: true },
+    shopId: { type: mongoose.Schema.Types.ObjectId, ref: "Shop"},
+    customerId:{type:mongoose.Schema.Types.ObjectId,ref:"Customer"},
     type: { type: String, enum: ["order", "lowStock"], required: true }, // Order or Low Stock
     productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: false }, // Only for low stock alerts
     message: { type: String, required: true },

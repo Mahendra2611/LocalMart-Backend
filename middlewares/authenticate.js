@@ -4,7 +4,8 @@ export const authenticateCustomer = (req, res, next) => {
   try {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ message: "Unauthorized" });
-
+    console.log("token");
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.customerId =  decoded.id ;
     next();
@@ -16,7 +17,7 @@ export const authenticateCustomer = (req, res, next) => {
 export const authenticateOwner = (req, res, next) => {
   try {
     const token = req.cookies.token;
-    console.log(token)
+    //console.log(token)
     if (!token) return res.status(401).json({ message: "Unauthorized" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);

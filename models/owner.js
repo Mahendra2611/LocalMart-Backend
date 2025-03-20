@@ -27,4 +27,7 @@ OwnerSchema.pre('save', async function (next) {
   next();
 });
 
+
 export const Owner =  mongoose.model('Owner', OwnerSchema);
+
+Owner.createIndexes({ shopLocation: "2dsphere" });
