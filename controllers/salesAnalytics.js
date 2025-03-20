@@ -5,10 +5,10 @@ import { Order } from "../models/order.js";
 export const updateSalesAnalytics = async (shopId, products, profit, paymentMethod) => {
     try {
         console.log("update analytics called");
-        console.log(shopId)
-        console.log(products)
-        console.log(profit)
-        console.log(paymentMethod)
+        // console.log(shopId)
+        // console.log(products)
+        // console.log(profit)
+        // console.log(paymentMethod)
         const today = new Date().toISOString().split("T")[0]; // Get today's date
 
         const totalQuantitySold = products.reduce((sum, product) => sum + product.quantity, 0);

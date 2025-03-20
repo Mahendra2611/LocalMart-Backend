@@ -11,8 +11,8 @@ export const placeOrder = async (req, res, next) => {
     //const customerId = req.customerId; // Extracted from auth middleware
 
     // Fetch product details from DB
-    console.log("order cust ",customerId)
-    console.log("order shop ",shopId)
+    // console.log("order cust ",customerId)
+    // console.log("order shop ",shopId)
     const productDetails = await Product.find({
       _id: { $in: products.map((item) => item.productId) },
     });

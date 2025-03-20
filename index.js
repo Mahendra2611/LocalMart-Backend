@@ -86,7 +86,10 @@ io.on("connection", (socket) => {
         socket.join(shopId);
         console.log(`Shop Owner joined room: ${shopId}`);
     });
-
+    socket.on("joinCustomer",(customerId)=>{
+        socket.join(customerId)
+        console.log(`Customer joined room: ${customerId}`)
+    })
     socket.on("disconnect", () => {
         console.log("User disconnected");
     });
