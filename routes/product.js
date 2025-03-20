@@ -1,5 +1,5 @@
 import express from "express";
-import { addProduct, updateProduct, deleteProduct, getProducts,getCategories,getLowStockProducts,getShopItemsByCategory,updateProductQuantities } from "../controllers/product.js";
+import { addProduct, updateProduct, deleteProduct, getProducts,getCategories,getLowStockProducts,getShopProduct,updateProductQuantities } from "../controllers/product.js";
 import { authenticateOwner } from "../middlewares/authenticate.js";
 import upload from "../middlewares/upload.js";
 const router = express.Router();
@@ -12,5 +12,5 @@ router.get("/low-stock", authenticateOwner,getLowStockProducts);
 router.get("/categories",authenticateOwner,getCategories)
 router.put("/update-quantities", authenticateOwner,updateProductQuantities);// Update product quantities
 // customer end point added 
-router.get("/:shopId/items", getShopItemsByCategory);
+router.get("/:shopId", getShopProduct);
 export default router;

@@ -116,14 +116,14 @@ export const getProducts = async (req, res) => {
 
 //  customer added 
  
-export const getShopItemsByCategory = async (req, res) => {
+export const getShopProduct = async (req, res) => {
   try {
       const { shopId } = req.params;
-      const { category } = req.query;
+      //const { category } = req.query;
     //   console.log(shopId)
 
     // Find products by shopId and category
-    const products = await Product.find({ shopId, category });
+    const products = await Product.find({ shopId });
 
     if (!products.length) {
       return res.status(404).json({ success: false, message: "No products found for this category in the shop" });
