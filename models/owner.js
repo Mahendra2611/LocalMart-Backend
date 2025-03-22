@@ -28,6 +28,22 @@ OwnerSchema.pre('save', async function (next) {
 });
 
 
+OwnerSchema.pre('save', function (next) {
+  if (!Array.isArray(this.itemCategories)) {
+    this.itemCategories = [];
+  }
+
+  if (!this.itemCategories.includes("All")) {
+    this.itemCategories.push("All");
+  }
+
+ 
+  this.itemCategories = [...new Set(this.itemCategories)].sort();
+
+  next();
+});
+
+
 export const Owner =  mongoose.model('Owner', OwnerSchema);
 
 Owner.createIndexes({ shopLocation: "2dsphere" });

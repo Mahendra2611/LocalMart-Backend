@@ -124,7 +124,7 @@ export const getCustomerOrders = async (req, res, next) => {
     const customerId = req.customerId;
     console.log(customerId)
     const orders = await Order.find({ customerId }).populate("shopId", "shopName");
-    console.log(orders)
+    //console.log(orders)
     res.json({ success: true, orders });
   } catch (error) {
     next(error);
