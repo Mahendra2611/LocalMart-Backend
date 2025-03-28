@@ -57,14 +57,7 @@ export const loginOwner = async (req, res, next) => {
 
     generateToken(res, owner._id, "owner");
 
-    //  Notify the frontend via Socket.io
-    if (req.io) {
-      req.io.to(owner._id.toString()).emit("owner_logged_in", {
-        message: `Welcome back, ${owner.shopName}!`,
-      });
-    }
-
-    res.json({ success: true, owner });
+    res.status(201).json({ success: true, name:owner.ownerName,email:owner.email });
   } catch (error) {
     next(error);
   }

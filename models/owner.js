@@ -16,6 +16,9 @@ const OwnerSchema = new mongoose.Schema(
       type: { type: String, enum: ['Point'], default: 'Point' },
       coordinates: { type: [Number], required: true },
     },
+    closingTime:{type:String},
+    openingTime:{type:String},
+    shopStatus:{type:String,enum:["OPEN","CLOSE"],default:"CLOSE"}
   },
   { timestamps: true }
 );

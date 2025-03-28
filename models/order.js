@@ -9,33 +9,28 @@ const orderSchema = new mongoose.Schema(
     products: [
       {
         productId:{type:mongoose.Schema.Types.ObjectId,ref:"Product",required:true},
-        name: { type: String, required: true }, // Snapshot of product name
-        category: { type: String, required: true }, // Store product category
+        name: { type: String, required: true }, 
+        category: { type: String, required: true }, 
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
       }
     ],
 
     totalAmount: { type: Number, required: true },
-    profit: { type: Number }, // Will be auto-calculated
+    profit: { type: Number }, 
     status: { type: String, enum: ["Pending", "Accepted", "Cancelled", "Delivered"], default: "Pending" },
 
     paymentStatus: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
     paymentMethod: { type: String, enum: ["cash","online","COD","UPI"], required: true },
 
-    invoiceId: { type: String, unique: true, default: uuidv4 }, // Auto-generate unique ID
-    deliveryAddress: { type: String, required: true }, // Needed for delivery
-    estimatedDeliveryDate: { type: Date }, // Optional
+    invoiceId: { type: String, unique: true, default: uuidv4 }, 
+    deliveryAddress: { type: String, required: true }, 
+    estimatedDeliveryDate: { type: Date }, 
     estimatedDeliveryTime: { type: String }
 
   },
   { timestamps: true }
 );
 
-// Auto-calculate profit before saving order
-orderSchema.pre("save", function (next) {
-  this.profit = this.products.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  next();
-});
 
 export const Order = mongoose.model("Order", orderSchema);
