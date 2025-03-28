@@ -41,4 +41,19 @@ export const stats = async (req, res,next) => {
       next(error)
     }
   };
+  export const toggleShopStatus = async(req,res,next)=>{
+    try {
+      const {status} = req.body;
+      console.log(status)
+      const ownerId = req.ownerId
+    const result = await Owner.findByIdAndUpdate(ownerId,{shopStatus:status},{new:true}).select('shopStatus');
+    console.log(result)
+    if(result){
+      return res.status(201).json(result)
+    }
+    return res.status(201).json({message:"Shop Status update failed"})
+    } catch (error) {
+      next(error)
+    }
+  }
   
