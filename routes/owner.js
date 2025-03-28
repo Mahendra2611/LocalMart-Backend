@@ -1,17 +1,8 @@
 import express from 'express';
-import {
-  registerOwner,
-  loginOwner,
-  getOwnerProfile,
-  updateShop,
-  deleteShop,
-  logoutOwner
-} from  '../controllers/owner.js';
+import {registerOwner,loginOwner,getOwnerProfile,updateShop,deleteShop,logoutOwner} from  '../controllers/owner.js';
 import { body } from 'express-validator';
 import { authenticateOwner } from '../middlewares/authenticate.js';
-
- import { getAllShops, getShopDetails } from '../controllers/shop.js';
-
+ import { getAllShops, getShopDetails } from '../controllers/shop.js'
  import upload from '../middlewares/upload.js';
  
 
@@ -34,7 +25,7 @@ router.post(
 );
 
 router.post('/login', loginOwner);
-router.post("/logout", authenticateOwner, logoutOwner); // Logout route
+router.post("/logout", authenticateOwner, logoutOwner); 
 router.get('/profile', authenticateOwner, getOwnerProfile);
 
 router.put("/update-shop", authenticateOwner, upload.single("shopImage"), updateShop);
