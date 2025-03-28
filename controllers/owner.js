@@ -12,7 +12,7 @@ export const registerOwner = async (req, res, next) => {
 
   try {
     const { mobileNumber, email, password,  ...otherDetails } = req.body;
-    const salt = await bcrypt.genSalt(saltRounds)
+    const salt = await bcrypt.genSalt(5)
      const pass = await bcrypt.hash(password,salt);
     const shopImageLink = req?.file?.path || req?.file?.url || "";
   // Ensure a string is assigned
@@ -40,6 +40,7 @@ export const registerOwner = async (req, res, next) => {
 
     res.status(201).json({ success: true, owner });
   } catch (error) {
+    console.log(error)
     next(error);
   }
 };
