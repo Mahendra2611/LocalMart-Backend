@@ -88,9 +88,10 @@ if (!process.env.MONGODB_URL) {
 }
 
 mongoose
-    .connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    .connect(process.env.MONGODB_URL)
     .then(() => console.log("✅ Database connected successfully"))
     .catch((e) => console.log("❌ Database connection error:", e));
+
 
 // ✅ Socket.io Events
 io.on("connection", (socket) => {
