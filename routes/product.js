@@ -4,6 +4,7 @@ import { authenticateOwner } from "../middlewares/authenticate.js";
 import upload from "../middlewares/upload.js";
 const router = express.Router();
 
+
 router.post("/add",authenticateOwner,upload.single("image"), addProduct); // Add item
 router.put("/update/:productId", authenticateOwner,upload.single("image"), updateProduct); // Update item
 router.delete("/delete/:productId",authenticateOwner,  deleteProduct); // Delete item

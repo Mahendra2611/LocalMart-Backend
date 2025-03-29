@@ -62,6 +62,12 @@ const customerSchema = new mongoose.Schema(
         ref: 'Order',
       },
     ],
+    token: {
+			type: String,
+		},
+		resetPasswordExpires: {
+			type: Date,
+		},
   },
   { timestamps: true }
 );

@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { io } from "../index.js"; // Import socket instance
 import { updateSalesAnalytics } from "./salesAnalytics.js"; // Adjust the path accordingly
 import mongoose from "mongoose";
+
 export const placeOrder = async (req, res, next) => {
   try {
     const { customerId,shopId, products, paymentMethod, deliveryAddress } = req.body;
@@ -118,10 +119,12 @@ export const placeOrder = async (req, res, next) => {
 //  Get Orders for a Customer
 export const getCustomerOrders = async (req, res, next) => {
   try {
-    const customerId = req.customerId;
-   
+    const cust = req.customerId;
+    const customerId =new mongoose.Types.ObjectId(cust)
+//     console.log(customerId)
     const orders = await Order.find({ customerId }).populate("shopId", "shopName");
-    
+    // console.log(orders)
+
     res.json({ success: true, orders });
   } catch (error) {
     next(error);
@@ -160,8 +163,6 @@ export const updateOrderStatus = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-   
-   
     if (status === "Accepted") {
       await updateSalesAnalytics(order.shopId, order.products, order.totalAmount, order.paymentMethod);
     } 

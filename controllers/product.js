@@ -110,7 +110,10 @@ export const getProducts = async (req, res) => {
         return res.status(404).json({ message: "No products found for this shop." });
       }
   
-      res.status(200).json(products);
+      res.status(200).json({
+        success:true,
+        products
+      });
     } catch (error) {
     const customError = new Error("Failed to fetch products");
     customError.statusCode = 500; 
