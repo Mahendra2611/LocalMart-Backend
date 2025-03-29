@@ -23,7 +23,7 @@ config(); // Load environment variables
 
 // CORS Configuration
 const corsOption = {
-    origin: ["http://localhost:5174", "http://localhost:5175", "http://localhost:5173", "http://192.168.121.82:5174"],
+    origin: ["https://shopsy-cust-frontend.vercel.app", "https://shopsy-frontend-cyan.vercel.app"],
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true,
 };
@@ -33,8 +33,9 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: corsOption });
 
 // Middleware
-app.use(cors(corsOption));
+
 app.use(express.json());
+app.use(cors(corsOption));
 app.use(cookieParser());
 
 // ✅ Session Setup (Fixed)
