@@ -2,10 +2,6 @@ import express from "express";
 import { config } from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
-import session from "express-session";
-import passport from "passport";
-import "./config/passport.js"; // Ensure OAuth strategy is correctly configured
-
 import customerRouter from "./routes/customer.js";
 import productRouter from "./routes/product.js";
 import ownerRouter from "./routes/owner.js";
@@ -38,18 +34,6 @@ app.use(express.json());
 app.use(cors(corsOption));
 app.use(cookieParser());
 
-// ✅ Session Setup (Fixed)
-app.use(session({
-    name: "session",
-    secret: process.env.SESSION_SECRET || "secretKey",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === "production", // Use true only with HTTPS
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-    },
-}));
 
 // ✅ Debugging Session Issues
 app.use((req, res, next) => {
@@ -57,9 +41,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+
 
 // Request Logging Middleware
 app.use((req, res, next) => {
@@ -73,26 +55,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// OAuth Routes
-app.get("/oauth/:provider", (req, res, next) => {
-    const provider = req.params.provider;
-    if (provider === "google") {
-        passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
-    } else {
-        return res.status(400).json({ message: "Invalid OAuth provider" });
-    }
-});
 
-app.get("/oauth/:provider/callback", (req, res, next) => {
-    const provider = req.params.provider;
-    if (provider === "google") {
-        passport.authenticate("google", { failureRedirect: "/" })(req, res, next);
-    } else {
-        return res.status(400).json({ message: "Invalid OAuth provider" });
-    }
-}, (req, res) => {
-    res.redirect("/dashboard"); // Redirect after successful login
-});
 
 // Test Route
 app.get("/test", (req, res) => {
