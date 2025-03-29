@@ -3,14 +3,14 @@ import { Product } from "../models/product.js";
 import { Owner } from "../models/owner.js";
 import { Notification } from "../models/notifications.js"; // Import Notification model
 import { v4 as uuidv4 } from "uuid";
-import { io } from "../index.js"; // Import socket instance
+
 import { updateSalesAnalytics } from "./salesAnalytics.js"; // Adjust the path accordingly
 import mongoose from "mongoose";
 
 export const placeOrder = async (req, res, next) => {
   try {
     const { customerId,shopId, products, paymentMethod, deliveryAddress } = req.body;
-   
+   const io = req.io;
     const productDetails = await Product.find({
       _id: { $in: products.map((item) => item.productId) },
     });
@@ -150,7 +150,7 @@ export const getShopOrders = async (req, res, next) => {
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
-   
+   const io = req.io;
     const { status } = req.body;
    
     if (!["Pending", "Accepted", "Cancelled", "Delivered"].includes(status)) {
