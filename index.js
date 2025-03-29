@@ -23,7 +23,7 @@ config(); // Load environment variables
 
 // CORS Configuration
 const corsOption = {
-    origin: ["https://shopsy-cust-frontend.vercel.app","https://shopsy-frontend-cyan.vercel.app"],
+    origin: ["https://shopsy-cust-frontend.vercel.app/","https://shopsy-frontend-cyan.vercel.app/"],
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true,
 };
