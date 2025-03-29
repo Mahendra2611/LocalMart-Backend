@@ -21,76 +21,77 @@ import { Server } from "socket.io";
 
 config(); // Load environment variables
 
-// CORS Configuration
+const app = express();
+const server = http.createServer(app);
+
+// ✅ *1. Define Allowed Origins*
 const allowedOrigins = [
     "https://shopsy-cust-frontend.vercel.app",
     "https://shopsy-frontend-cyan.vercel.app"
 ];
-const app = express();
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
 
-    if (allowedOrigins.includes(origin)) {
-        res.header("Access-Control-Allow-Origin", origin);
-        res.header("Access-Control-Allow-Credentials", "true");
-    }
+// ✅ *2. Setup CORS Middleware for Express*
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+};
 
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+// ✅ *3. Apply CORS Before Other Middlewares*
+app.use(cors(corsOptions));
 
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
-    }
+// ✅ *4. Handle Preflight Requests*
+app.options("*", cors(corsOptions));
 
-    next();
-});
-const server = http.createServer(app);
-const io = new Server(server, {cors: {
-        origin: ["https://shopsy-cust-frontend.vercel.app", "https://shopsy-frontend-cyan.vercel.app"],
+// ✅ *5. Setup WebSocket CORS*
+const io = new Server(server, {
+    cors: {
+        origin: allowedOrigins,
         methods: ["GET", "POST"],
-        credentials: true,
-    }, });
+        credentials: true,
+    },
+});
 
-// Middleware
+// ✅ *6. Middleware Setup*
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Session Setup (Fixed)
+// ✅ *7. Session Setup*
 app.use(session({
     name: "session",
     secret: process.env.SESSION_SECRET || "secretKey",
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === "production", // Use true only with HTTPS
+        secure: process.env.NODE_ENV === "production",
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000, // 1 day
     },
 }));
 
-// ✅ Debugging Session Issues
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ✅ *8. Debugging Logs*
 app.use((req, res, next) => {
+    console.log(Request: ${req.method} ${req.url});
     console.log("Session Data:", req.session);
     next();
 });
 
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Request Logging Middleware
-app.use((req, res, next) => {
-    console.log(`Request: ${req.method} ${req.url}`);
-    next();
-});
-
-// Pass `io` to routes
+// ✅ *9. Pass io to Routes*
 app.use((req, res, next) => {
     req.io = io;
     next();
 });
 
-// OAuth Routes
+// ✅ *10. OAuth Routes*
 app.get("/oauth/:provider", (req, res, next) => {
     const provider = req.params.provider;
     if (provider === "google") {
@@ -111,12 +112,12 @@ app.get("/oauth/:provider/callback", (req, res, next) => {
     res.redirect("/dashboard"); // Redirect after successful login
 });
 
-// Test Route
+// ✅ *11. Test Route*
 app.get("/test", (req, res) => {
     return res.json("Test successful");
 });
 
-// API Routes
+// ✅ *12. API Routes*
 app.use("/api/customer", customerRouter);
 app.use("/api/notifications", notificationRouter);
 app.use("/api/analytics", analyticsRouter);
@@ -126,7 +127,7 @@ app.use("/api/products", productRouter);
 app.use("/api/owner", ownerRouter);
 app.use("/api/payments", paymentRouter);
 
-// ✅ Ensure Database Connection is Secure
+// ✅ *13. Ensure Database Connection is Secure*
 if (!process.env.MONGODB_URL) {
     console.error("❌ ERROR: MONGODB_URL is not set in environment variables!");
     process.exit(1);
@@ -137,31 +138,32 @@ mongoose
     .then(() => console.log("✅ Database connected"))
     .catch((e) => console.log("❌ Database connection error:", e));
 
-// Socket.io Events
+// ✅ *14. Setup WebSocket Events*
 io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id);
+    console.log(A user connected: ${socket.id});
 
     socket.on("joinShop", (shopId) => {
         socket.join(shopId);
-        console.log(`Shop Owner joined room: ${shopId}`);
+        console.log(Shop Owner joined room: ${shopId});
     });
 
-    socket.on("joinCustomer",(customerId)=>{
-        socket.join(customerId)
-        console.log(`Customer joined room: ${customerId}`)
-    })
+    socket.on("joinCustomer", (customerId) => {
+        socket.join(customerId);
+        console.log(Customer joined room: ${customerId});
+    });
+
     socket.on("disconnect", () => {
         console.log("User disconnected");
     });
 });
 
-// Error Handling Middleware
+// ✅ *15. Error Handling Middleware*
 app.use(errorHandler);
 
-// Start Server
+// ✅ *16. Start Server*
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Server running on PORT ${PORT}`);
+    console.log(🚀 Server running on PORT ${PORT});
 });
 
-export { io };
+export { io };
