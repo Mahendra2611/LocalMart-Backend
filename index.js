@@ -22,18 +22,36 @@ import { Server } from "socket.io";
 config(); // Load environment variables
 
 // CORS Configuration
-const corsOption = {
-    origin: ["https://shopsy-cust-frontend.vercel.app","https://shopsy-frontend-cyan.vercel.app"],
-    methods: ["POST", "GET", "PUT", "DELETE"],
-    credentials: true,
-};
-
+const allowedOrigins = [
+    "https://shopsy-cust-frontend.vercel.app",
+    "https://shopsy-frontend-cyan.vercel.app"
+];
 const app = express();
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+
+    if (allowedOrigins.includes(origin)) {
+        res.header("Access-Control-Allow-Origin", origin);
+        res.header("Access-Control-Allow-Credentials", "true");
+    }
+
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+    }
+
+    next();
+});
 const server = http.createServer(app);
-const io = new Server(server, { cors: corsOption });
+const io = new Server(server, {cors: {
+        origin: ["https://shopsy-cust-frontend.vercel.app", "https://shopsy-frontend-cyan.vercel.app"],
+        methods: ["GET", "POST"],
+        credentials: true,
+    }, });
 
 // Middleware
-app.use(cors(corsOption));
 app.use(express.json());
 app.use(cookieParser());
 
