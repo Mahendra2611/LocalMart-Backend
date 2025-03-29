@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 export const getUnreadNotifications = async (req, res) => {
   try {
     const { shopId } = req.params;
-
+    
     // Fetch unread notifications for the given shop
     const notifications = await Notification.find({ shopId, read: false }).sort({ createdAt: -1 });
 

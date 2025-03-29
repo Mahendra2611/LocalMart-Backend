@@ -10,11 +10,7 @@ import mongoose from "mongoose";
 export const placeOrder = async (req, res, next) => {
   try {
     const { customerId,shopId, products, paymentMethod, deliveryAddress } = req.body;
-    //const customerId = req.customerId; // Extracted from auth middleware
-
-    // Fetch product details from DB
-    console.log("order cust ",customerId)
-    console.log("order shop ",shopId)
+   
     const productDetails = await Product.find({
       _id: { $in: products.map((item) => item.productId) },
     });
@@ -28,7 +24,7 @@ export const placeOrder = async (req, res, next) => {
     const finalProducts = [];
     const notifications = [];
 
-    // Validate stock & calculate amounts
+    
     for (const item of products) {
       const product = productDetails.find((p) => p._id.toString() === item.productId);
 
@@ -123,14 +119,12 @@ export const placeOrder = async (req, res, next) => {
 //  Get Orders for a Customer
 export const getCustomerOrders = async (req, res, next) => {
   try {
-    // console.log("hello")
-    // console.log(req.cust);
-    
     const cust = req.customerId;
     const customerId =new mongoose.Types.ObjectId(cust)
-    console.log(customerId)
+//     console.log(customerId)
     const orders = await Order.find({ customerId }).populate("shopId", "shopName");
     // console.log(orders)
+
     res.json({ success: true, orders });
   } catch (error) {
     next(error);
@@ -140,10 +134,10 @@ export const getCustomerOrders = async (req, res, next) => {
 //  **Get Orders for a Shop Owner**
 export const getShopOrders = async (req, res, next) => {
   try {
-    const ownerId = req.params.shopId;
-    console.log("shopId " + ownerId)
+    const Id = req.ownerId;
+    const ownerId = new mongoose.Types.ObjectId(Id);
     const orders = await Order.find({ shopId: ownerId });
-    res.json({ success: true, orders });
+    res.status(201).json({ success: true, orders });
   } catch (error) {
     next(error);
   }
@@ -156,9 +150,9 @@ export const getShopOrders = async (req, res, next) => {
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
-    console.log("order id " + orderId)
+   
     const { status } = req.body;
-    console.log(status)
+   
     if (!["Pending", "Accepted", "Cancelled", "Delivered"].includes(status)) {
       return res.status(400).json({ success: false, message: "Invalid status" });
     }
@@ -169,11 +163,7 @@ export const updateOrderStatus = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    // Call updateSalesAnalytics only when order is accepted
-   console.log(order)
     if (status === "Accepted") {
-      console.log("update from order called")
-      // console.log(order)
       await updateSalesAnalytics(order.shopId, order.products, order.totalAmount, order.paymentMethod);
     } 
     const shopName =  Owner.findById(order.shopId).select('shopName')
@@ -187,7 +177,7 @@ await Notification.insertOne({
   type:"order",
   message:`Order at ${shopName} has been ${status}`,
 })
-    res.json({ success: true, message: "Order status updated", order });
+    res.status(201).json({ success: true, message: "Order status updated", order });
   } catch (error) {
     next(error);
   }

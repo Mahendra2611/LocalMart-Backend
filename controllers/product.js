@@ -42,8 +42,7 @@ export const updateProduct = async (req, res, next) => {
     try {
         const { productId } = req.params;
         const { name, category, salesPrice, costPrice, quantity, image, discount ,oldImageLink } = req.body;
-        console.log(oldImageLink)
-        console.log(req.file)
+        
         let imageLink = oldImageLink;
         if (req.file && oldImageLink) {
           const publicId = oldImageLink.split('/').pop().split('.')[0]; // Extract public ID from URL
@@ -65,7 +64,7 @@ export const updateProduct = async (req, res, next) => {
                 discount,
                 offerPrice: discount > 0 ? salesPrice - (salesPrice * discount / 100) : salesPrice,
             },
-            { new: true } // Return updated item
+            { new: true } 
         );
 
         if (!updatedProduct) {
@@ -82,23 +81,29 @@ export const updateProduct = async (req, res, next) => {
 export const deleteProduct = async (req, res) => {
     try {
         const { productId } = req.params;
-        //console.log("delete")
+       
         const deletedProduct = await Product.findByIdAndDelete(productId);
-        //console.log(deletedProduct)
+       
         if (!deletedProduct) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
         res.status(200).json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
-        //console.log(error)
+       
        next(error)
     }
 };
 
+
+//Get all prodcuts of shop requested by shopkeeper
 export const getProducts = async (req, res) => {
     try {
       const  shopId  = req.ownerId;
+      if (!shopId) {
+        return res.status(400).json({ message: "Shop ID is required" });
+      }
+
       const products = await Product.find({ shopId });
   
       if (!products.length) {
@@ -110,8 +115,11 @@ export const getProducts = async (req, res) => {
         products
       });
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch products", error: error.message });
-    }
+    const customError = new Error("Failed to fetch products");
+    customError.statusCode = 500; 
+    next(customError); 
+}
+
   };
  
 
@@ -191,7 +199,7 @@ export const getLowStockProducts = async (req, res) => {
     const shopId = req.ownerId;
     try {
       const categories = await Owner.findById(shopId).select("itemCategories");
-      return res.status(200).json({categories})
+      return res.status(201).json({categories})
     } catch (error) {
       next(error)
     }
