@@ -5,27 +5,20 @@ export const getAllShops = async (req, res) => {
   try { 
     const { latitude, longitude } = req.query; 
 
-    if (!latitude || !longitude) {
-      return res.status(400).json({ success: false, message: "User location required" });
-    }
+    // if (!latitude || !longitude) {
+    //   return res.status(400).json({ success: false, message: "User location required" });
+    // }
 
-    const userLocation = {
-      type: "Point",
-      coordinates: [parseFloat(latitude),parseFloat(longitude) ], // official [longitude, latitude] but this doesn't work , so using [latitude,longitude]
-    };
-    console.log(userLocation)
-    const shops = await Owner.find({
-      shopLocation: {
-        $near: {
-          $geometry: userLocation,
-          $maxDistance: 5000, // 5km radius in meters
-        },
-      },
-    });
-    console.log(shops)
+    // const userLocation = {
+    //   type: "Point",
+    //   coordinates: [parseFloat(latitude),parseFloat(longitude) ], // official [longitude, latitude] but this doesn't work , so using [latitude,longitude]
+    // };
+    // console.log(userLocation)
+    const shops = await Owner.find({});
+    //console.log(shops)
     res.status(200).json({ 
       success: true,
-      message: "Shops within 5km radius fetched successfully",
+     
       data: shops,
     });
 

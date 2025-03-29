@@ -1,12 +1,11 @@
 import express from "express";
-import {
-  stats
-} from "../controllers/dashboard.js";
-import { authenticateOwner, authenticateCustomer } from "../middlewares/authenticate.js";
+import {stats,toggleShopStatus} from "../controllers/dashboard.js";
+import { authenticateOwner } from "../middlewares/authenticate.js";
 
 const router = express.Router();
 
-//  stats
+
 router.get("/stats", authenticateOwner,stats);
+router.post("/toggle-shop-status",authenticateOwner,toggleShopStatus)
 
 export default router;

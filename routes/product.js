@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/add",authenticateOwner,upload.single("image"), addProduct); // Add item
 router.put("/update/:productId", authenticateOwner,upload.single("image"), updateProduct); // Update item
 router.delete("/delete/:productId",authenticateOwner,  deleteProduct); // Delete item
-router.get("/", authenticateOwner,getProducts); // Fetch all products of a shop
+router.get("/", authenticateOwner,getProducts);
 router.get("/low-stock", authenticateOwner,getLowStockProducts);
 router.get("/categories",authenticateOwner,getCategories)
 router.put("/update-quantities", authenticateOwner,updateProductQuantities);// Update product quantities

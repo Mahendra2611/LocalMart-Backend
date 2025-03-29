@@ -16,6 +16,9 @@ const OwnerSchema = new mongoose.Schema(
       type: { type: String, enum: ['Point'], default: 'Point' },
       coordinates: { type: [Number], required: true },
     },
+    closingTime:{type:String},
+    openingTime:{type:String},
+    shopStatus:{type:String,enum:["OPEN","CLOSE"],default:"CLOSE"}
   },
   { timestamps: true }
 );
@@ -24,6 +27,22 @@ const OwnerSchema = new mongoose.Schema(
 OwnerSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+
+OwnerSchema.pre('save', function (next) {
+  if (!Array.isArray(this.itemCategories)) {
+    this.itemCategories = [];
+  }
+
+  if (!this.itemCategories.includes("All")) {
+    this.itemCategories.push("All");
+  }
+
+ 
+  this.itemCategories = [...new Set(this.itemCategories)].sort();
+
   next();
 });
 
