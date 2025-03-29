@@ -3,7 +3,6 @@ import { Owner } from '../models/owner.js';
 
 export const getAllShops = async (req, res) => {
   try { 
-    const { latitude, longitude } = req.query; 
 
     // if (!latitude || !longitude) {
     //   return res.status(400).json({ success: false, message: "User location required" });
