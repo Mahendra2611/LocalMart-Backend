@@ -225,7 +225,7 @@ export const addAddress = async (req, res) => {
   }
 };
 
-// ✅ Update an existing address
+//  Update an existing address
 export const updateAddress = async (req, res) => {
   try {
     const customerId = req.customerId;
