@@ -58,10 +58,10 @@ export const loginOwner = async (req, res, next) => {
 
     generateToken(res, owner._id, "owner");
 
-    res.status(201).json({ success: true, name:owner.ownerName,email:owner.email });
+    res.status(201).json({ success: true, name:owner.ownerName,email:owner.email,id:owner._id });
   } catch (error) {
     next(error);
-  }
+  }
 };
 
 export const logoutOwner = async (req, res, next) => {
