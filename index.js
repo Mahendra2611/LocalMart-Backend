@@ -2,8 +2,6 @@ import express from "express";
 import { config } from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
-import session from "express-session";
-import passport from "passport";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
@@ -58,33 +56,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-// ================
-// Session Setup
-// ================
-app.use(
-  session({
-    name: "session",
-    secret: process.env.SESSION_SECRET || "secretKey",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production", // true in production with HTTPS
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
-    }
-  })
-);
-
-// Debug Session Data (for development)
-app.use((req, res, next) => {
-  console.log("Session Data:", req.session);
-  next();
-});
-
-// Initialize Passport for OAuth and session handling
-app.use(passport.initialize());
-app.use(passport.session());
-
 // ====================
 // Create HTTP Server & Socket.io Setup
 // ====================
@@ -102,34 +73,6 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
-
-// ====================
-// OAuth Routes Example
-// ====================
-app.get("/oauth/:provider", (req, res, next) => {
-  const provider = req.params.provider;
-  if (provider === "google") {
-    passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
-  } else {
-    res.status(400).json({ message: "Invalid OAuth provider" });
-  }
-});
-
-app.get(
-  "/oauth/:provider/callback",
-  (req, res, next) => {
-    const provider = req.params.provider;
-    if (provider === "google") {
-      passport.authenticate("google", { failureRedirect: "/" })(req, res, next);
-    } else {
-      res.status(400).json({ message: "Invalid OAuth provider" });
-    }
-  },
-  (req, res) => {
-    // Redirect after successful login
-    res.redirect("/dashboard");
-  }
-);
 
 // ====================
 // Test Route
