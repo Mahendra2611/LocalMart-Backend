@@ -260,3 +260,21 @@ export const updateAddress = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+export const logout = async (req, res, next) => {
+  try {
+    res.cookie("token", "", { httpOnly: true, expires: new Date(0) }); // Clear token
+
+    // 🔹 Emit an event to remove the owner from their room
+    if (req.io && req.customerId) {
+      console.log("emitted")
+      req.io.to(req.customerId.toString()).emit("Logged-Out", {
+        message: "You have been logged out.",
+      });
+    }
+
+    res.status(201).json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -12,7 +12,7 @@ export const registerOwner = async (req, res, next) => {
 
   try {
     const { mobileNumber, email, password,  ...otherDetails } = req.body;
-    const salt = await bcrypt.genSalt(5)
+    const salt = await bcrypt.genSalt(10)
      const pass = await bcrypt.hash(password,salt);
     const shopImageLink = req?.file?.path || req?.file?.url || "";
   // Ensure a string is assigned
@@ -50,12 +50,19 @@ export const registerOwner = async (req, res, next) => {
 export const loginOwner = async (req, res, next) => {
   try {
     const { mobileNumber, email, password } = req.body;
-
+   
     const owner = await Owner.findOne({ $or: [{ mobileNumber }, { email }] });
-    if (!owner || !(await bcrypt.compare(password, owner.password))) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+  
+   
+    if (!owner  ) {
+      return res.status(400).json({ message: 'Invalid Email' });
     }
-
+    const matchPassword = await bcrypt.compare(password, owner.password)
+    
+    if(!matchPassword){
+      return res.status(400).json({ message: 'Invalid Password' });
+    }
+console.log("token")
     generateToken(res, owner._id, "owner");
 
     res.status(201).json({ success: true, name:owner.ownerName,email:owner.email,id:owner._id });
@@ -70,7 +77,7 @@ export const logoutOwner = async (req, res, next) => {
 
     // 🔹 Emit an event to remove the owner from their room
     if (req.io && req.ownerId) {
-      req.io.to(req.ownerId.toString()).emit("owner_logged_out", {
+      req.io.to(req.ownerId.toString()).emit("Logged-out", {
         message: "You have been logged out.",
       });
     }
