@@ -97,7 +97,7 @@ mongoose
 
 // Socket.io Events
 io.on("connection", (socket) => {
-    console.log(" A user connected:", socket.id);
+   
 
     socket.on("joinShop", (shopId) => {
         socket.join(shopId);

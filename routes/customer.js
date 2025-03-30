@@ -1,5 +1,5 @@
 import express from 'express';
-import { signupCustomer, loginCustomer, updateProfile,addAddress, updateAddress } from '../controllers/customer.js';
+import { signupCustomer, loginCustomer,logout, updateProfile,addAddress, updateAddress } from '../controllers/customer.js';
 import { authenticateCustomer } from '../middlewares/authenticate.js';
 import { resetPassword, resetPasswordToken } from '../controllers/resetPassword.js';
 
@@ -12,7 +12,7 @@ router.post("/address", authenticateCustomer, addAddress);
 router.put("/address/:addressId", authenticateCustomer, updateAddress);
 router.post('/reset-password-token',resetPasswordToken);
 router.post('/reset-password',resetPassword);
-
+router.post('/logout',authenticateCustomer,logout);
 // OAuth Routes
 router.get("/oauth/:provider", (req, res, next) => {
     const provider = req.params.provider;

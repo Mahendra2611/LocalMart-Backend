@@ -77,7 +77,7 @@ export const logoutOwner = async (req, res, next) => {
 
     // 🔹 Emit an event to remove the owner from their room
     if (req.io && req.ownerId) {
-      req.io.to(req.ownerId.toString()).emit("owner_logged_out", {
+      req.io.to(req.ownerId.toString()).emit("Logged-out", {
         message: "You have been logged out.",
       });
     }
