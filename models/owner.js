@@ -23,29 +23,6 @@ const OwnerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash password before saving
-OwnerSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
-
-
-OwnerSchema.pre('save', function (next) {
-  if (!Array.isArray(this.itemCategories)) {
-    this.itemCategories = [];
-  }
-
-  if (!this.itemCategories.includes("All")) {
-    this.itemCategories.push("All");
-  }
-
- 
-  this.itemCategories = [...new Set(this.itemCategories)].sort();
-
-  next();
-});
-
 
 export const Owner =  mongoose.model('Owner', OwnerSchema);
 
