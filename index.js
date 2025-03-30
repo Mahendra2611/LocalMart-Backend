@@ -18,11 +18,14 @@ import { Server } from "socket.io";
 config(); 
 
 
+// const allowedOrigins = [
+//     "https://shopsy-cust-frontend.vercel.app",
+//     "https://shopsy-frontend-cyan.vercel.app"
+// ];
 const allowedOrigins = [
-    "https://shopsy-cust-frontend.vercel.app",
-    "https://shopsy-frontend-cyan.vercel.app"
+    "https://shopsy-customer-production.up.railway.app",
+    "https://shopsy-frontend-production.up.railway.app"
 ];
-
 // const allowedOrigins = [
 //     "http://localhost:5173",
 //     "http://localhost:5174"
