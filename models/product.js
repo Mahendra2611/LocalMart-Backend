@@ -14,14 +14,6 @@ const productSchema = new mongoose.Schema({
     offerPrice: { type: Number }, // Final price after discount
 }, { timestamps: true });
 
-// Calculate offer price before saving
-productSchema.pre("save", function (next) {
-    if (this.discount > 0) {
-        this.offerPrice = this.salesPrice - (this.salesPrice * this.discount / 100);
-    } else {
-        this.offerPrice = this.salesPrice;
-    }
-    next();
-});
+
 
 export const Product = mongoose.model("Product", productSchema);
