@@ -4,6 +4,7 @@ import { body } from 'express-validator';
 import { authenticateOwner } from '../middlewares/authenticate.js';
  import { getAllShops, getShopDetails } from '../controllers/shop.js'
  import upload from '../middlewares/upload.js';
+import { ownResetPassword, ownResetPasswordToken } from '../controllers/resetPassword.js';
  
 
 const router = express.Router();
@@ -36,5 +37,7 @@ router.delete('/delete-shop', authenticateOwner, deleteShop);
 // i added 
 router.get('/getAllShops',getAllShops);
 router.get('/:shopId',getShopDetails);
+router.post('/reset-password-token',ownResetPasswordToken);
+router.post('/reset-password',ownResetPassword);
 
 export default router;
