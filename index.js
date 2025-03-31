@@ -18,15 +18,15 @@ import { Server } from "socket.io";
 config(); 
 
 
-const allowedOrigins = [
-    "https://shopsy-cust-frontend.vercel.app",
-    "https://shopsy-frontend-cyan.vercel.app"
-];
-
 // const allowedOrigins = [
-//     "http://localhost:5173",
-//     "http://localhost:5174"
+//     "https://shopsy-cust-frontend.vercel.app",
+//     "https://shopsy-frontend-cyan.vercel.app"
 // ];
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174"
+];
 
 const corsOptions = {
     origin: allowedOrigins,
