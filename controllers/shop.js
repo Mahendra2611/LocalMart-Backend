@@ -1,8 +1,10 @@
 import { Owner } from '../models/owner.js';
-
+import {Product} from "../models/product.js"
 
 export const getAllShops = async (req, res) => {
   try { 
+
+   // const { latitude, longitude } = req.query; 
 
     // if (!latitude || !longitude) {
     //   return res.status(400).json({ success: false, message: "User location required" });
@@ -14,10 +16,11 @@ export const getAllShops = async (req, res) => {
     // };
     // console.log(userLocation)
     const shops = await Owner.find({});
+    const products = await Product.find({});
     //console.log(shops)
     res.status(200).json({ 
       success: true,
-     
+     products,
       data: shops,
     });
 
@@ -36,12 +39,13 @@ export const getShopDetails = async (req, res) => {
       
       // Find the shop by ID
       const shop = await Owner.findById(shopId);
+     
       
       if (!shop) {
         return res.status(404).json({ success: false, message: "Shop not found" });
       }
       
-      res.status(200).json({ success: true, data: shop });
+      res.status(200).json({ success: true, data: shop});
     } catch (error) {
       res.status(500).json({ success: false, message: "Server Error", error: error.message });
     }
