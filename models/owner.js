@@ -18,7 +18,13 @@ const OwnerSchema = new mongoose.Schema(
     },
     closingTime:{type:String},
     openingTime:{type:String},
-    shopStatus:{type:String,enum:["OPEN","CLOSE"],default:"CLOSE"}
+    shopStatus:{type:String,enum:["OPEN","CLOSE"],default:"CLOSE"},
+    token: {
+			type: String,
+		},
+		resetPasswordExpires: {
+			type: Date,
+		},
   },
   { timestamps: true }
 );

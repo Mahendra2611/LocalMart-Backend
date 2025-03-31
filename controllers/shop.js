@@ -3,6 +3,7 @@ import {Product} from "../models/product.js"
 
 export const getAllShops = async (req, res) => {
   try { 
+
    // const { latitude, longitude } = req.query; 
 
     // if (!latitude || !longitude) {
