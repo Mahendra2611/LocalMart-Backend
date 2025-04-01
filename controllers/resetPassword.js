@@ -12,7 +12,7 @@ export const custResetPasswordToken = async (req, res) => {
     const user = await Cust.findOne({ email: email });
 
     if (!user) {
-      return res.json({
+      return res.json({ 
         success: false,
         message: `This Email: ${email} is not Registered With Us. Enter a Valid Email.`,
       });
@@ -32,7 +32,7 @@ export const custResetPasswordToken = async (req, res) => {
     console.log("DETAILS", updatedDetails);
 
     const url = `http://localhost:5173/update-password/${token}`;
-    console.log(url);
+    // console.log(url);
 
     await mailSender(
       email,

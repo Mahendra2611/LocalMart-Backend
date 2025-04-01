@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import customerRouter from "./routes/customer.js";
 import productRouter from "./routes/product.js";
+import contactRouter from "./routes/contact.js";
 import ownerRouter from "./routes/owner.js";
 import orderRouter from "./routes/order.js";
 import analyticsRouter from "./routes/salesAnalytics.js";
@@ -85,6 +86,7 @@ app.use("/api/order", orderRouter);
 app.use("/api/products", productRouter);
 app.use("/api/owner", ownerRouter);
 app.use("/api/payments", paymentRouter);
+app.use("/api",contactRouter);
 
 //  Ensure MongoDB Connection is Secure
 if (!process.env.MONGODB_URL) {
