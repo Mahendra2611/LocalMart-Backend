@@ -10,10 +10,11 @@ const storage = new CloudinaryStorage({
   },
 });
 
-const upload = multer({
+const upload = multer({  
   storage,
   limits: { fileSize: 1 * 1024 * 500 }, //size limit 500 KB
   fileFilter: (req, file, cb) => {
+    console.log("infilter");
     
     if (!file.mimetype.startsWith('image/')) {
       return cb(new Error('Only image files are allowed!'), false);
