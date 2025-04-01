@@ -18,6 +18,11 @@ import { Server } from "socket.io";
 config(); 
 
 
+
+// const allowedOrigins = [
+//     "https://shopsy-customer-production.up.railway.app",
+//     "https://shopsy-frontend-production.up.railway.app"
+// ];
 // const allowedOrigins = [
 //     "https://shopsy-cust-frontend.vercel.app",
 //     "https://shopsy-frontend-cyan.vercel.app"
@@ -65,7 +70,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Pass `io` to routes
+// Pass io to routes
 app.use((req, res, next) => {
     req.io = io;
     next();
@@ -120,6 +125,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, "0.0.0.0", () => {
     console.log(` Server running on PORT ${PORT}`);
 });
-
-
-

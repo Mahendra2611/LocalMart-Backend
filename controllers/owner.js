@@ -68,7 +68,7 @@ console.log("token")
     res.status(201).json({ success: true, name:owner.ownerName,email:owner.email,id:owner._id });
   } catch (error) {
     next(error);
-  }
+  }
 };
 
 export const logoutOwner = async (req, res, next) => {
