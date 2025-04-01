@@ -20,19 +20,19 @@ config();
 
 
 
-// const allowedOrigins = [
-//     "https://shopsy-customer-production.up.railway.app",
-//     "https://shopsy-frontend-production.up.railway.app"
-// ];
+const allowedOrigins = [
+    "https://shopsy-customer-production.up.railway.app",
+    "https://shopsy-frontend-production.up.railway.app"
+];
 // const allowedOrigins = [
 //     "https://shopsy-cust-frontend.vercel.app",
 //     "https://shopsy-frontend-cyan.vercel.app"
 // ];
 
-const allowedOrigins = [
-    "http://localhost:5173",
-    "http://localhost:5174"
-];
+// const allowedOrigins = [
+//     "http://localhost:5173",
+//     "http://localhost:5174"
+// ];
 
 const corsOptions = {
     origin: allowedOrigins,
