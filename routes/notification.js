@@ -9,12 +9,14 @@ import { authenticateOwner } from "../middlewares/authenticate.js";
 import { authenticateCustomer } from "../middlewares/authenticate.js";
 const router = express.Router();
 
-
-router.get("/:shopId", authenticateOwner, getUnreadNotifications);
-
-router.put("/mark-all-read/:shopId", authenticateOwner, markAllAsRead);
-
 router.get("/customer", authenticateCustomer, getUnreadNotificationsForCustomer);
+
+router.get("/shopkeeper", authenticateOwner, getUnreadNotifications);
+
+router.put("/mark-all-read", authenticateOwner, markAllAsRead);
+
+
+
 
 router.put("/customer/mark-all-read", authenticateCustomer, markAllAsReadForCustomer);
 

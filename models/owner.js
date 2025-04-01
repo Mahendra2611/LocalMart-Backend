@@ -32,4 +32,4 @@ const OwnerSchema = new mongoose.Schema(
 
 export const Owner =  mongoose.model('Owner', OwnerSchema);
 
-Owner.createIndexes({ shopLocation: "2dsphere" });
+//Owner.createIndexes({ shopLocation: "2dsphere" });

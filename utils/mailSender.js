@@ -1,6 +1,8 @@
 import nodemailer from "nodemailer";
 
 const mailSender = async (email, title, body) => {
+  // console.log("in mailsender",body);
+  
   try {
     let transporter = nodemailer.createTransport({
       host: process.env.MAIL_HOST,
@@ -17,7 +19,7 @@ const mailSender = async (email, title, body) => {
       html: body,
     });
 
-    console.log(info);
+    // console.log(info);
     return info;
   } catch (error) {
     console.error(error);
