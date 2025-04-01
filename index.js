@@ -17,9 +17,6 @@ import http from "http";
 import { Server } from "socket.io";
 
 config(); 
-
-
-
 const allowedOrigins = [
     "https://shopsy-customer-production.up.railway.app",
     "https://shopsy-frontend-production.up.railway.app"
