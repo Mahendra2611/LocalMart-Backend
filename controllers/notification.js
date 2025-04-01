@@ -31,6 +31,7 @@ export const markAllAsRead = async (req, res) => {
 
 export const getUnreadNotificationsForCustomer = async (req, res) => {
   try {
+    console.log("object")
     const customerId = req.customerId;
     
 
