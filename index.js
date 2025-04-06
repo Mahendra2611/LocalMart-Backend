@@ -34,10 +34,17 @@ const allowedOrigins = [
 // ];
 
 const corsOptions = {
-    origin: allowedOrigins,
-    methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
-    credentials: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
 };
+
 
 const app = express();
 const server = http.createServer(app);
