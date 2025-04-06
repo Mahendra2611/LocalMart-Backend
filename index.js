@@ -20,7 +20,8 @@ config();
 const allowedOrigins = [
     "https://shopsy-customer-production.up.railway.app",
     "https://shopsy-frontend-production.up.railway.app",
-    "https://shopsy-customer.onrender.com"
+    "https://shopsy-customer.onrender.com",
+   "https://shopsy-frontend.onrender.com"
 ];
 // const allowedOrigins = [
 //     "https://shopsy-cust-frontend.vercel.app",
